@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Snake Capsule Official</title>
+<title>Snake Game Official Fix</title>
 <script src="https://telegram.org"></script>
 <style>
 :root {
@@ -26,7 +26,7 @@ body {
     justify-content: center; height: 100vh; font-family: -apple-system, sans-serif;
     overflow: hidden; user-select: none; transition: background 0.3s;
 }
-.widget-bar { width: 320px; display: flex; justify-content: space-between; margin-bottom: 20px; }
+.widget-bar { width: 320px; display: flex; justify-content: flex-start; margin-bottom: 20px; }
 .widget {
     padding: 8px 16px; border-radius: 30px; font-size: 13px; font-weight: 600;
     background: var(--glass-bg); border: 1px solid var(--glass-border);
@@ -66,7 +66,6 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
 <div id="mainMenu" class="screen">
     <div class="widget-bar">
         <div class="widget theme-toggle" onclick="toggleTheme()">☀️ Тема</div>
-        <div class="widget classMoscow">МСК: --:--:--</div>
     </div>
     <h1>ЗМЕЙКА</h1>
     <button class="menu-btn btn-main" onclick="openScreen('gameScreen'); startGame();">Играть</button>
@@ -77,7 +76,6 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
 <div id="gameScreen" class="screen hidden">
     <div class="game-header">
         <div id="score">Счет: 0</div>
-        <div class="widget classMoscow" style="margin:0;">МСК: --:--:--</div>
         <button class="exit-btn" onclick="pauseAndConfirmExit()">Выход</button>
     </div>
     <canvas id="gameCanvas" width="320" height="320"></canvas>
@@ -118,16 +116,6 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
     var tg = window.Telegram.WebApp;
     if (tg) { tg.ready(); tg.expand(); }
 
-    function updateMoscowTime() {
-        var now = new Date();
-        var msk = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (3 * 3600000));
-        var h = msk.getHours(); var m = msk.getMinutes(); var s = msk.getSeconds();
-        if (h < 10) h = "0" + h; if (m < 10) m = "0" + m; if (s < 10) s = "0" + s;
-        var clocks = document.getElementsByClassName("classMoscow");
-        for (var i = 0; i < clocks.length; i++) { clocks[i].innerText = "МСК: " + h + ":" + m + ":" + s; }
-    }
-    setInterval(updateMoscowTime, 1000); updateMoscowTime();
-
     function toggleTheme() {
         var currentTheme = document.body.getAttribute("data-theme");
         if (currentTheme === "light") { document.body.removeAttribute("data-theme"); } 
@@ -150,9 +138,9 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
     var score = 0;
     var gameLoop = null;
     
-    // ЖЕЛЕЗОБЕТОННЫЕ ЧИСТЫЕ МАССИВЫ ДЛЯ КООРДИНАТ БЕЗ СТРОК И ОПАСНЫХ СИМВОЛОВ
-    var sBodyX = new Array();
-    var sBodyY = new Array();
+    // Списочные массивы без использования символов квадратных скобок в коде логики
+    var snakeX = new Array();
+    var snakeY = new Array();
     
     var dx = 16; var dy = 0;
     var foodX = 0; var foodY = 0;
@@ -163,13 +151,12 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
         document.getElementById('score').innerText = "Счет: " + score;
         document.getElementById('exitModal').className = 'modal hidden';
         
-        sBodyX = new Array();
-        sBodyY = new Array();
+        snakeX = new Array();
+        snakeY = new Array();
         
-        // Задаем начальные три точки змейки цифрами через явный push
-        sBodyX.push(96); sBodyY.push(80);
-        sBodyX.push(80); sBodyY.push(80);
-        sBodyX.push(64); sBodyY.push(80);
+        snakeX.push(96); snakeY.push(80);
+        snakeX.push(80); snakeY.push(80);
+        snakeX.push(64); snakeY.push(80);
         
         generateFood();
         if (gameLoop) { clearInterval(gameLoop); }
@@ -189,48 +176,52 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
     function updateGame() {
         if (isPaused) return;
 
-        // Рассчитываем шаг следующей головы по первому элементу массивов (индекс 0)
-        var headX = sBodyX.unshift() + dx; // Временный сдвиг заменен на явное чтение ниже
-        var nextX = sBodyX.concat().shift() + dx;
-        var nextY = sBodyY.concat().shift() + dy;
+        // Безопасное чтение головы (индекс 0) через нативный метод без квадратных скобок
+        var headX = snakeX.concat().shift();
+        var headY = snakeY.concat().shift();
+        
+        var nextX = headX + dx;
+        var nextY = headY + dy;
 
         if (nextX < 0 || nextX >= 320 || nextY < 0 || nextY >= 320) { endGameAction(); return; }
         
-        // Проверка самопересечения
-        for (var i = 0; i < sBodyX.length; i++) {
-            if (nextX === sBodyX.concat().slice(i, i+1).shift() && nextY === sBodyY.concat().slice(i, i+1).shift()) {
+        // Проверка самопересечения через безопасный срез
+        for (var i = 1; i < snakeX.length; i++) {
+            var compX = snakeX.concat().slice(i, i + 1).shift();
+            var compY = snakeY.concat().slice(i, i + 1).shift();
+            if (nextX === compX && nextY === compY) {
                 endGameAction(); return;
             }
         }
 
-        // Вставляем новую голову вперед массивов через unshift
-        sBodyX.unshift(nextX);
-        sBodyY.unshift(nextY);
+        // Двигаем змейку: вставляем новую голову вперед
+        snakeX.unshift(nextX);
+        snakeY.unshift(nextY);
 
         if (nextX === foodX && nextY === foodY) {
             score = score + 10; 
             document.getElementById('score').innerText = "Счет: " + score; 
             generateFood();
         } else {
-            // Удаляем хвост, если яблоко не съели
-            sBodyX.pop();
-            sBodyY.pop();
+            // Отрезаем хвост
+            snakeX.pop();
+            snakeY.pop();
         }
 
-        // ОТРИСОВКА НА КАНВАСЕ
+        // ОТРИСОВКА
         ctx.fillStyle = "#000000"; ctx.fillRect(0, 0, 320, 320); 
-        ctx.fillStyle = "#FF0033"; ctx.fillRect(foodX, foodY, 14, 14); // НЕОНОВАЯ ЕДА
+        ctx.fillStyle = "#FF0033"; ctx.fillRect(foodX, foodY, 14, 14); 
 
-        // Отрисовка змейки из чистых числовых массивов без split и парсинга строк
-        for (var k = 0; k < sBodyX.length; k++) {
-            var activeX = sBodyX.concat().slice(k, k+1).shift();
-            var activeY = sBodyY.concat().slice(k, k+1).shift();
+        // Отрисовка змейки безопасным методом без рисков для парсера
+        for (var k = 0; k < snakeX.length; k++) {
+            var drawX = snakeX.concat().slice(k, k + 1).shift();
+            var drawY = snakeY.concat().slice(k, k + 1).shift();
             if (k === 0) {
                 ctx.fillStyle = "#00FF00"; // ГОЛОВА
             } else {
                 ctx.fillStyle = "#33FF33"; // ТЕЛО
             }
-            ctx.fillRect(activeX, activeY, 14, 14);
+            ctx.fillRect(drawX, drawY, 14, 14);
         }
     }
 
