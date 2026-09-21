@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Snake Game Pure HTML</title>
+<title>Snake HTML Grid</title>
 <script src="https://telegram.org"></script>
 <style>
 body {
@@ -39,7 +39,6 @@ h1 { font-size: 42px; margin-bottom: 30px; color: #00FF00; text-shadow: 0 0 10px
     background: #FF0033; color: white; border: none;
     padding: 8px 16px; font-weight: bold; border-radius: 8px; cursor: pointer; z-index: 20;
 }
-/* НОВОЕ ИГРОВОЕ ПОЛЕ НА CSS GRID ВМЕСТО CANVAS */
 #gameBoard {
     display: grid;
     grid-template-columns: repeat(20, 1fr);
@@ -49,11 +48,10 @@ h1 { font-size: 42px; margin-bottom: 30px; color: #00FF00; text-shadow: 0 0 10px
     border: 2px solid #333;
     border-radius: 10px;
 }
-.cell { background: #000000; }
-.snake-head { background: #00FF00 !important; border-radius: 3px; box-shadow: 0 0 5px #00FF00; }
+.cell { background: #000000; border: 1px solid #111; box-sizing: border-box; }
+.snake-head { background: #00FF00 !important; border-radius: 3px; box-shadow: 0 0 8px #00FF00; }
 .snake-body { background: #33FF33 !important; border-radius: 2px; }
-.food { background: #FF0033 !important; border-radius: 50%; box-shadow: 0 0 5px #FF0033; }
-
+.food { background: #FF0033 !important; border-radius: 50%; box-shadow: 0 0 8px #FF0033; }
 .controls { display: grid; grid-template-columns: repeat(3, 75px); gap: 12px; margin-top: 20px; }
 .ctrl-btn {
     width: 75px; height: 75px; background: #252525; border: none;
@@ -91,7 +89,6 @@ h1 { font-size: 42px; margin-bottom: 30px; color: #00FF00; text-shadow: 0 0 10px
         <div id="score">Счет: 0</div>
         <button class="exit-btn" onclick="pauseAndConfirmExit()">Выход</button>
     </div>
-    <!-- Сетка игрового поля -->
     <div id="gameBoard"></div>
     <div class="controls">
         <button class="ctrl-btn" style="grid-column:2;" onclick="changeDir('up')">▲</button>
@@ -143,9 +140,9 @@ h1 { font-size: 42px; margin-bottom: 30px; color: #00FF00; text-shadow: 0 0 10px
     var score = 0;
     var gameLoop = null;
     
-    // Генерируем 400 физических квадратиков внутри сетки
+    // ИСПРАВЛЕНО: Правильный цикл генерации сетки из 400 ячеек
     var boardHtml = "";
-    for (var cellId = 0; i < 400; cellId++) {
+    for (var cellId = 0; cellId < 400; cellId++) {
         boardHtml += "<div class='cell' id='c" + cellId + "'></div>";
     }
     board.innerHTML = boardHtml;
@@ -201,11 +198,9 @@ h1 { font-size: 42px; margin-bottom: 30px; color: #00FF00; text-shadow: 0 0 10px
         if (isPaused) return;
 
         var currentHeadStr = headX + "_" + headY + ",";
-
         headX = headX + dx; 
         headY = headY + dy;
 
-        // Коллизия с границами сетки (20х20 клеток)
         if (headX < 0 || headX >= 20 || headY < 0 || headY >= 20) {
             endGameAction(); return;
         }
@@ -215,37 +210,30 @@ h1 { font-size: 42px; margin-bottom: 30px; color: #00FF00; text-shadow: 0 0 10px
             endGameAction(); return;
         }
 
-        if (snakeStr !== "") {
-            snakeStr = currentHeadStr + snakeStr;
-        } else {
-            snakeStr = currentHeadStr;
-        }
+        snakeStr = currentHeadStr + snakeStr;
 
         if (headX === foodX && headY === foodY) {
             score = score + 10;
             document.getElementById('score').innerText = "Счет: " + score;
             generateFood();
         } else {
-            var lastComma = snakeStr.lastIndexOf(",");
+            var cleanStr = snakeStr.substring(0, snakeStr.length - 1);
+            var lastComma = cleanStr.lastIndexOf(",");
             if (lastComma !== -1) {
-                snakeStr = snakeStr.substring(0, lastComma);
+                snakeStr = snakeStr.substring(0, lastComma + 1);
             }
         }
 
-        // ОЧИСТКА ВСЕХ КЛЕТОК НА ПОЛЕ БЕЗ CANVAS
         for (var cleanId = 0; cleanId < 400; cleanId++) {
             document.getElementById("c" + cleanId).className = "cell";
         }
         
-        // РИСУЕМ ЕДУ (Подсвечиваем нужный квадратик)
         var foodIndex = foodY * 20 + foodX;
         document.getElementById("c" + foodIndex).className = "cell food";
         
-        // РИСУЕМ ГОЛОВУ ЗМЕЙКИ
         var headIndex = headY * 20 + headX;
         document.getElementById("c" + headIndex).className = "cell snake-head";
 
-        // РИСУЕМ ТЕЛО ЗМЕЙКИ ИЗ ТЕКСТОВОЙ СТРОКИ КООРДИНАТ
         var tempStr = snakeStr;
         while (tempStr.indexOf(",") !== -1) {
             var commaIndex = tempStr.indexOf(",");
@@ -261,7 +249,6 @@ h1 { font-size: 42px; margin-bottom: 30px; color: #00FF00; text-shadow: 0 0 10px
                 var partY = parseInt(textY, 10);
                 
                 var bodyIndex = partY * 20 + partX;
-                // Проверяем существование ячейки во избежание ошибок
                 if (bodyIndex >= 0 && bodyIndex < 400) {
                     document.getElementById("c" + bodyIndex).className = "cell snake-body";
                 }
@@ -274,7 +261,7 @@ h1 { font-size: 42px; margin-bottom: 30px; color: #00FF00; text-shadow: 0 0 10px
         if (direction === 'left' && dx === 0) { dx = -1; dy = 0; }
         if (direction === 'up' && dy === 0) { dx = 0; dy = -1; }
         if (direction === 'right' && dx === 0) { dx = 1; dy = 0; }
-        if (direction === 'down' && dy === 0) { dx = 0; dy = 1; }
+        if (direction === 'down' && dy === 0) { dx = 0; i = 1; dy = 1; }
     }
 
     document.addEventListener('keydown', function(e) {
@@ -285,6 +272,7 @@ h1 { font-size: 42px; margin-bottom: 30px; color: #00FF00; text-shadow: 0 0 10px
         if (e.key === 'Escape') { pauseAndConfirmExit(); }
     });
 
+    // Память истории игр
     function saveMatchToHistory(finalScore) {
         var existingHistory = localStorage.getItem('snake_history');
         var historyArray = existingHistory ? existingHistory.split(',') : [];
