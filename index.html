@@ -129,11 +129,11 @@ canvas {
 
     var canvas = document.getElementById("gameCanvas");
     var ctx = canvas.getContext("2d");
-    var grid = 16; 
     
     var score = 0;
     var gameLoop = null;
     
+    // Текстовая лента змейки
     var snakeStr = ""; 
     var headX = 96;
     var headY = 80;
@@ -149,7 +149,7 @@ canvas {
         document.getElementById('score').innerText = "Счет: " + score;
         document.getElementById('exitModal').className = 'modal hidden';
         
-        snakeStr = "80_80,64_80"; 
+        snakeStr = "80_80,64_80,"; 
         generateFood();
         
         if (gameLoop) { clearInterval(gameLoop); }
@@ -177,14 +177,14 @@ canvas {
     }
 
     function generateFood() {
-        foodX = Math.floor(Math.random() * 19 + 1) * 16;
-        foodY = Math.floor(Math.random() * 19 + 1) * 16;
+        foodX = Math.floor(Math.random() * 18 + 1) * 16;
+        foodY = Math.floor(Math.random() * 18 + 1) * 16;
     }
 
     function updateGame() {
         if (isPaused) return;
 
-        var currentHeadStr = headX + "_" + headY;
+        var currentHeadStr = headX + "_" + headY + ",";
 
         headX = headX + dx; 
         headY = headY + dy;
@@ -193,39 +193,50 @@ canvas {
             endGameAction(); return;
         }
 
-        var nextHeadStr = headX + "_" + headY;
+        var nextHeadStr = headX + "_" + headY + ",";
         if (snakeStr.indexOf(nextHeadStr) !== -1) {
             endGameAction(); return;
         }
 
-        if (snakeStr !== "") {
-            snakeStr = currentHeadStr + "," + snakeStr;
-        } else {
-            snakeStr = currentHeadStr;
-        }
+        snakeStr = currentHeadStr + snakeStr;
 
         if (headX === foodX && headY === foodY) {
             score = score + 10;
             document.getElementById('score').innerText = "Счет: " + score;
             generateFood();
         } else {
-            var lastComma = snakeStr.lastIndexOf(",");
+            // Отрезаем последний сегмент строки
+            var cleanStr = snakeStr.substring(0, snakeStr.length - 1);
+            var lastComma = cleanStr.lastIndexOf(",");
             if (lastComma !== -1) {
-                snakeStr = snakeStr.substring(0, lastComma);
+                snakeStr = snakeStr.substring(0, lastComma + 1);
             }
         }
 
+        // Очистка экрана
         ctx.fillStyle = "#000000"; ctx.fillRect(0, 0, 320, 320);
+        
+        // Ярко-красная неоновая еда
         ctx.fillStyle = "#FF0033"; ctx.fillRect(foodX, foodY, 14, 14);
+        
+        // Ярко-зеленая голова
         ctx.fillStyle = "#00FF00"; ctx.fillRect(headX, headY, 14, 14);
 
+        // Стабильный рендеринг тела через цикл текстового поиска подстрок
         ctx.fillStyle = "#33FF33";
-        var segments = snakeStr.split(",");
-        for (var i = 0; i < segments.length; i++) {
-            if (segments[i] !== "") {
-                var coords = segments[i].split("_");
-                var partX = parseInt(coords.slice(0, 1), 10); 
-                var partY = parseInt(coords.slice(1, 2), 10); 
+        var tempStr = snakeStr;
+        while (tempStr.indexOf(",") !== -1) {
+            var commaIndex = tempStr.indexOf(",");
+            var singleSegment = tempStr.substring(0, commaIndex);
+            tempStr = tempStr.substring(commaIndex + 1);
+            
+            if (singleSegment !== "") {
+                var underscoreIndex = singleSegment.indexOf("_");
+                var textX = singleSegment.substring(0, underscoreIndex);
+                var textY = singleSegment.substring(underscoreIndex + 1);
+                
+                var partX = parseInt(textX, 10);
+                var partY = parseInt(textY, 10);
                 ctx.fillRect(partX, partY, 14, 14);
             }
         }
