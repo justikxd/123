@@ -110,53 +110,41 @@ canvas {
 </div>
 
 <script>
-    const tg = window.Telegram.WebApp;
+    var tg = window.Telegram.WebApp;
     if (tg) { tg.ready(); tg.expand(); }
 
     function openScreen(screenId) {
-        document.getElementById('mainMenu').classList.add('hidden');
-        document.getElementById('gameScreen').classList.add('hidden');
-        document.getElementById('achievementsScreen').classList.add('hidden');
-        document.getElementById('historyScreen').classList.add('hidden');
-        
-        document.getElementById(screenId).classList.remove('hidden');
+        document.getElementById('mainMenu').className = 'screen hidden';
+        document.getElementById('gameScreen').className = 'screen hidden';
+        document.getElementById('achievementsScreen').className = 'screen hidden';
+        document.getElementById('historyScreen').className = 'screen hidden';
+        document.getElementById(screenId).className = 'screen';
         if (screenId !== 'gameScreen') { stopGame(); }
     }
 
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-    const grid = 16; 
+    var canvas = document.getElementById("gameCanvas");
+    var ctx = canvas.getContext("2d");
+    var grid = 16; 
     
-    let score = 0;
-    let gameLoop = null;
+    var score = 0;
+    var gameLoop = null;
     
-    // Создаем списки вообще без использования символов квадратных скобок
-    let snakeBodyX = new Array();
-    let snakeBodyY = new Array();
+    var snakeStr = ""; 
+    var headX = 96;
+    var headY = 80;
     
-    let dx = grid;
-    let dy = 0;
-    let foodX = 0;
-    let foodY = 0;
-    let isPaused = false;
+    var dx = 16;
+    var dy = 0;
+    var foodX = 0;
+    var foodY = 0;
+    var isPaused = false;
 
     function startGame() {
-        score = 0; 
-        dx = grid; 
-        dy = 0; 
-        isPaused = false;
-        
+        score = 0; dx = 16; dy = 0; headX = 96; headY = 80; isPaused = false;
         document.getElementById('score').innerText = "Счет: " + score;
-        document.getElementById('exitModal').classList.add('hidden');
+        document.getElementById('exitModal').className = 'modal hidden';
         
-        // Наполняем стартовое тело змейки через функцию push
-        snakeBodyX = new Array();
-        snakeBodyY = new Array();
-        
-        snakeBodyX.push(96); snakeBodyY.push(80);
-        snakeBodyX.push(80); snakeBodyY.push(80);
-        snakeBodyX.push(64); snakeBodyY.push(80);
-        
+        snakeStr = "80_80,64_80"; 
         generateFood();
         
         if (gameLoop) { clearInterval(gameLoop); }
@@ -169,86 +157,77 @@ canvas {
 
     function pauseAndConfirmExit() {
         isPaused = true;
-        document.getElementById('exitModal').classList.remove('hidden');
+        document.getElementById('exitModal').className = 'modal';
     }
 
     function resumeGame() {
         isPaused = false; 
-        document.getElementById('exitModal').classList.add('hidden');
+        document.getElementById('exitModal').className = 'modal hidden';
     }
 
     function confirmExit() {
-        document.getElementById('exitModal').classList.add('hidden');
-        stopGame(); 
-        openScreen('mainMenu');
+        document.getElementById('exitModal').className = 'modal hidden';
+        stopGame(); openScreen('mainMenu');
     }
 
     function generateFood() {
-        foodX = Math.floor(Math.random() * (canvas.width / grid)) * grid;
-        foodY = Math.floor(Math.random() * (canvas.height / grid)) * grid;
+        foodX = Math.floor(Math.random() * 20) * 16;
+        foodY = Math.floor(Math.random() * 20) * 16;
     }
 
     function updateGame() {
         if (isPaused) return;
 
-        // Берем координаты головы (первый элемент списка) через функцию .at()
-        let nextX = snakeBodyX.at(0) + dx;
-        let nextY = snakeBodyY.at(0) + dy;
-
-        // Столкновение со стенами
-        if (nextX < 0 || nextX >= canvas.width || nextY < 0 || nextY >= canvas.height) {
-            endGameAction(); 
-            return;
+        if (snakeStr !== "") {
+            snakeStr = headX + "_" + headY + "," + snakeStr;
+        } else {
+            snakeStr = headX + "_" + headY;
         }
 
-        // Столкновение с собственным телом
-        for (let i = 0; i < snakeBodyX.length; i++) {
-            if (nextX === snakeBodyX.at(i) && nextY === snakeBodyY.at(i)) {
-                endGameAction(); 
-                return;
-            }
+        headX = headX + dx; 
+        headY = headY + dy;
+
+        if (headX < 0 || headX >= 320 || headY < 0 || headY >= 320) {
+            endGameAction(); return;
         }
 
-        // Добавляем новую голову в начало списков
-        snakeBodyX.unshift(nextX);
-        snakeBodyY.unshift(nextY);
+        if (snakeStr.indexOf(headX + "_" + headY) !== -1) {
+            endGameAction(); return;
+        }
 
-        // Проверка съедания яблока
-        if (nextX === foodX && nextY === foodY) {
-            score += 10;
+        if (headX === foodX && headY === foodY) {
+            score = score + 10;
             document.getElementById('score').innerText = "Счет: " + score;
             generateFood();
         } else {
-            // Удаляем лишний хвост
-            snakeBodyX.pop();
-            snakeBodyY.pop();
+            var lastComma = snakeStr.lastIndexOf(",");
+            if (lastComma !== -1) {
+                snakeStr = snakeStr.substring(0, lastComma);
+            }
         }
 
-        // ОТРИСОВКА НА КАНВАСЕ
-        ctx.fillStyle = "black"; 
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "black"; ctx.fillRect(0, 0, 320, 320);
+        ctx.fillStyle = "#FF5252"; ctx.fillRect(foodX, foodY, 14, 14);
+        ctx.fillStyle = "#2E7D32"; ctx.fillRect(headX, headY, 14, 14);
 
-        // Рисуем еду
-        ctx.fillStyle = "#FF5252"; 
-        ctx.fillRect(foodX, foodY, grid - 2, grid - 2);
-
-        // Рисуем змейку через функцию перебора .at()
-        for (let i = 0; i < snakeBodyX.length; i++) {
-            if (i === 0) {
-                ctx.fillStyle = "#2E7D32"; // Голова
-            } else {
-                ctx.fillStyle = "#4CAF50"; // Тело
+        ctx.fillStyle = "#4CAF50";
+        var segments = snakeStr.split(",");
+        for (var i = 0; i < segments.length; i++) {
+            if (segments[i] !== "") {
+                var coords = segments[i].split("_");
+                var x = parseInt(coords[0], 10);
+                var y = parseInt(coords[1], 10);
+                ctx.fillRect(x, y, 14, 14);
             }
-            ctx.fillRect(snakeBodyX.at(i), snakeBodyY.at(i), grid - 2, grid - 2);
         }
     }
 
     function changeDir(direction) {
         if (isPaused) return;
-        if (direction === 'left' && dx === 0) { dx = -grid; dy = 0; }
-        if (direction === 'up' && dy === 0) { dx = 0; dy = -grid; }
-        if (direction === 'right' && dx === 0) { dx = grid; dy = 0; }
-        if (direction === 'down' && dy === 0) { dx = 0; dy = grid; }
+        if (direction === 'left' && dx === 0) { dx = -16; dy = 0; }
+        if (direction === 'up' && dy === 0) { dx = 0; dy = -16; }
+        if (direction === 'right' && dx === 0) { dx = 16; dy = 0; }
+        if (direction === 'down' && dy === 0) { dx = 0; dy = 16; }
     }
 
     document.addEventListener('keydown', function(e) {
@@ -261,8 +240,7 @@ canvas {
 
     function endGameAction() {
         alert("Игра окончена! Ваш счет: " + score);
-        stopGame(); 
-        openScreen('mainMenu');
+        stopGame(); openScreen('mainMenu');
     }
 </script>
 </body>
