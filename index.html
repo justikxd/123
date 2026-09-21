@@ -14,8 +14,9 @@
         }
         #score { font-size: 24px; margin-bottom: 10px; font-weight: bold; }
         canvas { border: 2px solid #333; background: #000; max-width: 90vw; max-height: 50vh; border-radius: 10px; }
-        .controls { display: grid; grid-template-columns: repeat(3, 70px); gap: 10px; margin-top: 25px; }
-        .btn { width: 70px; height: 70px; background: #333; border: none; color: white; font-size: 24px; border-radius: 15px; active { background: #555; } }
+        .controls { display: grid; grid-template-columns: repeat(3, 75px); gap: 12px; margin-top: 25px; }
+        .btn { width: 75px; height: 75px; background: #333; border: none; color: white; font-size: 26px; border-radius: 15px; }
+        .btn:active { background: #555; }
         .btn-up { grid-column: 2; }
         .btn-left { grid-column: 1; }
         .btn-right { grid-column: 3; }
@@ -42,27 +43,38 @@
         const ctx = canvas.getContext("2d");
         const grid = 20;
         let score = 0;
-        let gameInterval;
 
         let snake = [{x: 160, y: 160}, {x: 140, y: 160}, {x: 120, y: 160}];
-        let dx = grid, dy = 0;
+        let dx = grid;
+        let dy = 0;
         let food = {x: 300, y: 200};
 
         function main() {
             if (hasGameEnded()) {
                 alert("Игра окончена! Ваш счет: " + score);
                 resetGame();
-                return;
+            } else {
+                clearCanvas();
+                drawFood();
+                moveSnake();
+                drawSnake();
             }
-            clearCanvas();
-            drawFood();
-            moveSnake();
-            drawSnake();
         }
 
-        function clearCanvas() { ctx.fillStyle = "black"; ctx.fillRect(0, 0, canvas.width, canvas.height); }
-        function drawSnake() { ctx.fillStyle = '#4CAF50'; snake.forEach(part => ctx.fillRect(part.x, part.y, grid-2, grid-2)); }
-        function drawFood() { ctx.fillStyle = '#FF5252'; ctx.fillRect(food.x, food.y, grid-2, grid-2); }
+        function clearCanvas() { 
+            ctx.fillStyle = "black"; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height); 
+        }
+
+        function drawSnake() { 
+            ctx.fillStyle = '#4CAF50'; 
+            snake.forEach(part => ctx.fillRect(part.x, part.y, grid-2, grid-2)); 
+        }
+
+        function drawFood() { 
+            ctx.fillStyle = '#FF5252'; 
+            ctx.fillRect(food.x, food.y, grid-2, grid-2); 
+        }
 
         function moveSnake() {
             const head = {x: snake[0].x + dx, y: snake[0].y + dy};
@@ -71,7 +83,9 @@
                 score += 10;
                 document.getElementById('score').innerText = "Счет: " + score;
                 generateFood();
-            } else { snake.pop(); }
+            } else { 
+                snake.pop(); 
+            }
         }
 
         function changeDir(direction) {
@@ -87,21 +101,24 @@
         }
 
         function hasGameEnded() {
+            const head = snake[0];
             for (let i = 4; i < snake.length; i++) { 
-                if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) return true; 
+                if (snake[i].x === head.x && snake[i].y === head.y) return true; 
             }
-            return snake[0].x < 0 || snake[0].x >= canvas.width || snake[0].y < 0 || snake[0].y >= canvas.height;
+            return head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height;
         }
 
         function resetGame() { 
             snake = [{x: 160, y: 160}, {x: 140, y: 160}, {x: 120, y: 160}]; 
-            dx = grid; dy = 0; score = 0; 
+            dx = grid; 
+            dy = 0; 
+            score = 0; 
             document.getElementById('score').innerText = "Счет: " + score;
             generateFood(); 
         }
 
         generateFood();
-        gameInterval = setInterval(main, 150);
+        setInterval(main, 150);
     </script>
 </body>
 </html>
