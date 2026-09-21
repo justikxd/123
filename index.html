@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Snake Game</title>
+<title>Snake Game Official</title>
 <script src="https://telegram.org"></script>
 <style>
 body {
@@ -134,8 +134,9 @@ canvas {
     var score = 0;
     var gameLoop = null;
     
-    var snakeX = new Array();
-    var snakeY = new Array();
+    var snakeStr = ""; 
+    var headX = 96;
+    var headY = 80;
     
     var dx = 16;
     var dy = 0;
@@ -144,17 +145,11 @@ canvas {
     var isPaused = false;
 
     function startGame() {
-        score = 0; dx = 16; dy = 0; isPaused = false;
+        score = 0; dx = 16; dy = 0; headX = 96; headY = 80; isPaused = false;
         document.getElementById('score').innerText = "Счет: " + score;
         document.getElementById('exitModal').className = 'modal hidden';
         
-        snakeX = new Array();
-        snakeY = new Array();
-        
-        snakeX.push(96); snakeY.push(80);
-        snakeX.push(80); snakeY.push(80);
-        snakeX.push(64); snakeY.push(80);
-        
+        snakeStr = "80_80,64_80"; 
         generateFood();
         
         if (gameLoop) { clearInterval(gameLoop); }
@@ -182,52 +177,57 @@ canvas {
     }
 
     function generateFood() {
-        foodX = Math.floor(Math.random() * 20) * 16;
-        foodY = Math.floor(Math.random() * 20) * 16;
+        foodX = Math.floor(Math.random() * 19 + 1) * 16;
+        foodY = Math.floor(Math.random() * 19 + 1) * 16;
     }
 
     function updateGame() {
         if (isPaused) return;
 
-        // Берем координаты головы через безопасную деструктуризацию первого элемента (индекс 0)
-        var firstX = snakeX[0];
-        var firstY = snakeY[0];
-        
-        var nextX = firstX + dx;
-        var nextY = firstY + dy;
+        var currentHeadStr = headX + "_" + headY;
 
-        if (nextX < 0 || nextX >= 320 || nextY < 0 || nextY >= 320) {
+        headX = headX + dx; 
+        headY = headY + dy;
+
+        if (headX < 0 || headX >= 320 || headY < 0 || headY >= 320) {
             endGameAction(); return;
         }
 
-        for (var i = 0; i < snakeX.length; i++) {
-            if (nextX === snakeX[i] && nextY === snakeY[i]) {
-                endGameAction(); return;
-            }
+        var nextHeadStr = headX + "_" + headY;
+        if (snakeStr.indexOf(nextHeadStr) !== -1) {
+            endGameAction(); return;
         }
 
-        snakeX.unshift(nextX);
-        snakeY.unshift(nextY);
+        if (snakeStr !== "") {
+            snakeStr = currentHeadStr + "," + snakeStr;
+        } else {
+            snakeStr = currentHeadStr;
+        }
 
-        if (nextX === foodX && nextY === foodY) {
+        if (headX === foodX && headY === foodY) {
             score = score + 10;
             document.getElementById('score').innerText = "Счет: " + score;
             generateFood();
         } else {
-            snakeX.pop();
-            snakeY.pop();
+            var lastComma = snakeStr.lastIndexOf(",");
+            if (lastComma !== -1) {
+                snakeStr = snakeStr.substring(0, lastComma);
+            }
         }
 
-        ctx.fillStyle = "#000000"; ctx.fillRect(0, 0, 320, 320); 
-        ctx.fillStyle = "#FF0033"; ctx.fillRect(foodX, foodY, 14, 14); 
+        ctx.fillStyle = "#000000"; ctx.fillRect(0, 0, 320, 320);
+        ctx.fillStyle = "#FF0033"; ctx.fillRect(foodX, foodY, 14, 14);
+        ctx.fillStyle = "#00FF00"; ctx.fillRect(headX, headY, 14, 14);
 
-        for (var k = 0; k < snakeX.length; k++) {
-            if (k === 0) {
-                ctx.fillStyle = "#00FF00"; 
-            } else {
-                ctx.fillStyle = "#33FF33"; 
+        ctx.fillStyle = "#33FF33";
+        var segments = snakeStr.split(",");
+        for (var i = 0; i < segments.length; i++) {
+            if (segments[i] !== "") {
+                var coords = segments[i].split("_");
+                var partX = parseInt(coords.slice(0, 1), 10); 
+                var partY = parseInt(coords.slice(1, 2), 10); 
+                ctx.fillRect(partX, partY, 14, 14);
             }
-            ctx.fillRect(snakeX[k], snakeY[k], 14, 14);
         }
     }
 
