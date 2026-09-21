@@ -140,7 +140,6 @@ h1 { font-size: 42px; margin-bottom: 30px; color: #00FF00; text-shadow: 0 0 10px
     var score = 0;
     var gameLoop = null;
     
-    // Создаем сетку игрового поля
     var boardHtml = "";
     for (var cellId = 0; cellId < 400; cellId++) {
         boardHtml += "<div class='cell' id='c" + cellId + "'></div>";
@@ -228,10 +227,10 @@ h1 { font-size: 42px; margin-bottom: 30px; color: #00FF00; text-shadow: 0 0 10px
             document.getElementById("c" + cleanId).className = "cell";
         }
         
-        var foodIndex = foodY * 20 + foodX;
+        var foodIndex = (foodY * 20) + foodX;
         document.getElementById("c" + foodIndex).className = "cell food";
         
-        var headIndex = headY * 20 + headX;
+        var headIndex = (headY * 20) + headX;
         document.getElementById("c" + headIndex).className = "cell snake-head";
 
         var tempStr = snakeStr;
@@ -248,7 +247,7 @@ h1 { font-size: 42px; margin-bottom: 30px; color: #00FF00; text-shadow: 0 0 10px
                 var partX = parseInt(textX, 10);
                 var partY = parseInt(textY, 10);
                 
-                var bodyIndex = partY * 20 + partX;
+                var bodyIndex = (partY * 20) + partX;
                 if (bodyIndex >= 0 && bodyIndex < 400) {
                     document.getElementById("c" + bodyIndex).className = "cell snake-body";
                 }
@@ -261,7 +260,7 @@ h1 { font-size: 42px; margin-bottom: 30px; color: #00FF00; text-shadow: 0 0 10px
         if (direction === 'left' && dx === 0) { dx = -1; dy = 0; }
         if (direction === 'up' && dy === 0) { dx = 0; dy = -1; }
         if (direction === 'right' && dx === 0) { dx = 1; dy = 0; }
-        if (direction === 'down' && dy === 0) { dx = 0; dy = 1; } // ИСПРАВЛЕНО
+        if (direction === 'down' && dy === 0) { dx = 0; dy = 1; }
     }
 
     document.addEventListener('keydown', function(e) {
