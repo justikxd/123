@@ -235,6 +235,7 @@ h2 { font-size: 24px; margin-bottom: 15px; color: #fff; }
             if (lastComma !== -1) { snakeStr = snakeStr.substring(0, lastComma + 1); }
         }
 
+        // ИСПРАВЛЕНО: Полностью чистый рабочий цикл очистки клеток
         var cellsCount = currentGridSize * currentGridSize;
         for (var c = 0; c < cellsCount; c++) {
             var el = document.getElementById("cell_" + c);
