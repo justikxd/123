@@ -3,35 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Змейка в Telegram</title>
+    <title>Snake Game</title>
     <script src="https://telegram.org"></script>
     <style>
         body {
-            margin: 0; background: #1a1a1a; color: white;
+            margin: 0; background: #141414; color: white;
             display: flex; flex-direction: column; align-items: center;
-            justify-content: center; height: 100vh; font-family: sans-serif;
+            justify-content: center; height: 100vh; font-family: 'Segoe UI', sans-serif;
             overflow: hidden; user-select: none;
         }
-        #score { font-size: 24px; margin-bottom: 10px; font-weight: bold; }
-        canvas { border: 2px solid #333; background: #000; max-width: 90vw; max-height: 50vh; border-radius: 10px; }
-        .controls { display: grid; grid-template-columns: repeat(3, 75px); gap: 12px; margin-top: 25px; }
-        .btn { width: 75px; height: 75px; background: #333; border: none; color: white; font-size: 26px; border-radius: 15px; }
-        .btn:active { background: #555; }
-        .btn-up { grid-column: 2; }
-        .btn-left { grid-column: 1; }
-        .btn-right { grid-column: 3; }
-        .btn-down { grid-column: 2; }
+        /* Главное меню */
+        .screen {
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; width: 100%; height: 100%; position: absolute; top: 0; left: 0;
+            background: #141414; z-index: 10; transition: 0.3s;
+        }
+        .hidden { display: none !important; }
+        h1 { font-size: 42px; margin-bottom: 30px; color: #4CAF50; text-shadow: 0 0 10px rgba(76,175,80,0.3); }
+        .menu-btn {
+            width: 240px; padding: 15px; margin: 10px; background: #222; border: 2px solid #333;
+            color: white; font-size: 18px; font-weight: bold; border-radius: 12px; cursor: pointer; transition: 0.2s;
+        }
+        .menu-btn:active { background: #4CAF50; border-color: #4CAF50; transform: scale(0.98); }
+        .btn-main { background: #4CAF50; border-color: #4CAF50; }
+        .btn-main:active { background: #45a049; }
+        
+        /* Экран игры */
+        #gameScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #score { font-size: 24px; margin-bottom: 10px; font-weight: bold; color: #aaa; }
+        canvas { border: 2px solid #333; background: #000; max-width: 90vw; max-height: 45vh; border-radius: 10px; }
+        .controls { display: grid; grid-template-columns: repeat(3, 75px); gap: 12px; margin-top: 20px; }
+        .ctrl-btn { width: 75px; height: 75px; background: #252525; border: none; color: white; font-size: 26px; border-radius: 15px; }
+        .ctrl-btn:active { background: #4CAF50; }
+
+        /* Текстовые подстраницы */
+        .content-box { width: 85%; max-width: 320px; background: #1c1c1c; border-radius: 16px; padding: 20px; border: 1px solid #333; text-align: center; }
+        .content-box p { font-size: 18px; line-height: 1.6; margin: 10px 0; color: #ccc; }
     </style>
 </head>
 <body>
-    <div id="score">Счет: 0</div>
-    <canvas id="gameCanvas" width="400" height="400"></canvas>
-    
-    <div class="controls">
-        <button class="btn btn-up" onclick="changeDir('up')">▲</button>
-        <button class="btn btn-left" onclick="changeDir('left')">◀</button>
-        <button class="btn btn-right" onclick="changeDir('right')">▶</button>
-        <button class="btn btn-down" onclick="changeDir('down')">▼</button>
+
+    <!-- ГЛАВНОЕ МЕНЮ -->
+    <div id="mainMenu" class="screen">
+        <h1>ЗМЕЙКА</h1>
+        <button class="menu-btn btn-main" onclick="openScreen('gameScreen'); startGame();">ИГРАТЬ</button>
+        <button class="menu-btn" onclick="openScreen('achievementsScreen')">ДОСТИЖЕНИЯ</button>
+        <button class="menu-btn" onclick="openScreen('historyScreen')">ИСТОРИЯ ИГР</button>
+    </div>
+
+    <!-- ЭКРАН ИГРЫ -->
+    <div id="gameScreen" class="screen hidden">
+        <div id="score">Счет: 0</div>
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <div class="controls">
+            <button class="ctrl-btn" style="grid-column:2;" onclick="changeDir('up')">▲</button>
+            <button class="ctrl-btn" style="grid-column:1;" onclick="changeDir('left')">◀</button>
+            <button class="ctrl-btn" style="grid-column:3;" onclick="changeDir('right')">▶</button>
+            <button class="ctrl-btn" style="grid-column:2;" onclick="changeDir('down')">▼</button>
+        </div>
+    </div>
+
+    <!-- ЭКРАН ДОСТИЖЕНИЙ -->
+    <div id="achievementsScreen" class="screen hidden">
+        <div class="content-box">
+            <h2>🏆 Достижения</h2>
+            <p>🍏 <b>Первый перекус:</b> Съесть 1 яблоко</p>
+            <p>🐍 <b>Длинный хвост:</b> Набрать 100 очков</p>
+            <p>⚡ <b>Мастер маневров:</b> Набрать 300 очков</p>
+            <button class="menu-btn" style="width:100%; margin:20px 0 0 0;" onclick="openScreen('mainMenu')">Назад</button>
+        </div>
+    </div>
+
+    <!-- ЭКРАН ИСТОРИИ -->
+    <div id="historyScreen" class="screen hidden">
+        <div class="content-box">
+            <h2>📜 История игр</h2>
+            <p>Игра #1 — 0 очков</p>
+            <p>Игра #2 — 0 очков</p>
+            <p>Игра #3 — 0 очков</p>
+            <button class="menu-btn" style="width:100%; margin:20px 0 0 0;" onclick="openScreen('mainMenu')">Назад</button>
+        </div>
     </div>
 
     <script>
@@ -39,61 +90,58 @@
         tg.ready();
         tg.expand();
 
+        // Переключение экранов
+        function openScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            document.getElementById(screenId).classList.remove('hidden');
+            if (screenId !== 'gameScreen') stopGame();
+        }
+
+        // Логика игры
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         const grid = 20;
         let score = 0;
+        let gameLoop = null;
 
-        // Создаем змейку через отдельные переменные координат головы
-        let headX = 160;
-        let headY = 160;
-        let snake = [];
-        let dx = grid;
-        let dy = 0;
-        let food = {x: 300, y: 200};
+        let headX, headY, snake, dx, dy, food;
 
-        function main() {
-            // Движение головы
-            headX = headX + dx;
-            headY = headY + dy;
+        function startGame() {
+            headX = 160; headY = 160;
+            snake = [{x: 160, y: 160}, {x: 140, y: 160}];
+            dx = grid; dy = 0; score = 0;
+            document.getElementById('score').innerText = "Счет: " + score;
+            generateFood();
+            if(gameLoop) clearInterval(gameLoop);
+            gameLoop = setInterval(updateGame, 150);
+        }
 
-            // Проверка проигрыша (выход за границы экрана)
+        function stopGame() {
+            if(gameLoop) { clearInterval(gameLoop); gameLoop = null; }
+        }
+
+        function updateGame() {
+            headX += dx; headY += dy;
+
             if (headX < 0 || headX >= canvas.width || headY < 0 || headY >= canvas.height) {
                 alert("Игра окончена! Ваш счет: " + score);
-                resetGame();
+                openScreen('mainMenu');
                 return;
             }
 
-            // Добавляем новую позицию головы в начало тела
             snake.unshift({x: headX, y: headY});
 
-            // Проверка съедания еды
             if (headX === food.x && headY === food.y) {
                 score += 10;
                 document.getElementById('score').innerText = "Счет: " + score;
                 generateFood();
             } else {
-                snake.pop(); // Удаляем хвост, если еду не ели
+                snake.pop();
             }
 
-            clearCanvas();
-            drawFood();
-            drawSnake();
-        }
-
-        function clearCanvas() { 
-            ctx.fillStyle = "black"; 
-            ctx.fillRect(0, 0, canvas.width, canvas.height); 
-        }
-
-        function drawSnake() { 
-            ctx.fillStyle = '#4CAF50'; 
-            snake.forEach(part => ctx.fillRect(part.x, part.y, grid-2, grid-2)); 
-        }
-
-        function drawFood() { 
-            ctx.fillStyle = '#FF5252'; 
-            ctx.fillRect(food.x, food.y, grid-2, grid-2); 
+            ctx.fillStyle = "black"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#FF5252'; ctx.fillRect(food.x, food.y, grid-2, grid-2);
+            ctx.fillStyle = '#4CAF50'; snake.forEach(part => ctx.fillRect(part.x, part.y, grid-2, grid-2));
         }
 
         function changeDir(direction) {
@@ -104,23 +152,11 @@
         }
 
         function generateFood() {
-            food.x = Math.floor(Math.random() * (canvas.width / grid)) * grid;
-            food.y = Math.floor(Math.random() * (canvas.height / grid)) * grid;
+            food = {
+                x: Math.floor(Math.random() * (canvas.width / grid)) * grid,
+                y: Math.floor(Math.random() * (canvas.height / grid)) * grid
+            };
         }
-
-        function resetGame() { 
-            headX = 160;
-            headY = 160;
-            snake = [{x: 160, y: 160}, {x: 140, y: 160}]; 
-            dx = grid; 
-            dy = 0; 
-            score = 0; 
-            document.getElementById('score').innerText = "Счет: " + score;
-            generateFood(); 
-        }
-
-        resetGame();
-        setInterval(main, 150);
     </script>
 </body>
 </html>
