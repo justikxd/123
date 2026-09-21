@@ -3,10 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Snake Game Liquid Glass</title>
+<title>Snake Game Capsule Glass</title>
 <script src="https://telegram.org"></script>
 <style>
-/* Базовые переменные для тем */
 :root {
     --bg-color: #121212;
     --text-color: #ffffff;
@@ -14,7 +13,7 @@
     --panel-border: rgba(255, 255, 255, 0.08);
     --glass-bg: rgba(255, 255, 255, 0.05);
     --glass-border: rgba(255, 255, 255, 0.1);
-    --glass-highlight: rgba(255, 255, 255, 0.2);
+    --glass-highlight: rgba(255, 255, 255, 0.15);
     --shadow-color: rgba(0, 0, 0, 0.5);
     --accent-color: #00ff00;
 }
@@ -24,7 +23,7 @@
     --panel-bg: rgba(0, 0, 0, 0.02);
     --panel-border: rgba(0, 0, 0, 0.1);
     --glass-bg: rgba(255, 255, 255, 0.4);
-    --glass-border: rgba(255, 255, 255, 0.5);
+    --glass-border: rgba(255, 255, 255, 0.3);
     --glass-highlight: rgba(255, 255, 255, 0.6);
     --shadow-color: rgba(163, 177, 198, 0.6);
     --accent-color: #00aa00;
@@ -35,19 +34,17 @@ body {
     justify-content: center; height: 100vh; font-family: -apple-system, sans-serif;
     overflow: hidden; user-select: none; transition: background 0.3s, color 0.3s;
 }
-/* Верхний виджет-бар */
 .top-bar {
     position: absolute; top: 15px; left: 15px; right: 15px;
     display: flex; justify-content: space-between; align-items: center; z-index: 50;
 }
 .widget {
-    padding: 8px 14px; border-radius: 20px; font-size: 14px; font-weight: 600;
+    padding: 8px 16px; border-radius: 30px; font-size: 14px; font-weight: 600;
     background: var(--glass-bg); border: 1px solid var(--glass-border);
     backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
     box-shadow: 0 4px 15px var(--shadow-color);
 }
-.theme-toggle { cursor: pointer; transition: transform 0.2s; }
-.theme-toggle:active { transform: scale(0.9); }
+.theme-toggle { cursor: pointer; }
 
 .screen {
     display: flex; flex-direction: column; align-items: center;
@@ -57,21 +54,22 @@ body {
 .hidden { display: none !important; }
 h1 { font-size: 46px; margin-bottom: 35px; color: var(--accent-color); text-shadow: 0 0 15px var(--accent-color); font-weight: 800; letter-spacing: 2px; }
 
-/* УЛЬТРА-СТИЛЬ LIQUID GLASS ДЛЯ КНОПОК */
+/* УЛЬТРА-ЗАКРУГЛЕННЫЕ КНОПКИ КАПСУЛЬНОГО ТИПА (border-radius: 40px) */
 .menu-btn {
-    width: 250px; padding: 16px; margin: 12px; color: var(--text-color);
-    font-size: 18px; font-weight: 700; border-radius: 16px; border: 1px solid var(--glass-border);
+    width: 260px; padding: 16px; margin: 10px; color: var(--text-color);
+    font-size: 17px; font-weight: 750; border-radius: 40px; border: 1px solid var(--glass-border);
     background: linear-gradient(135deg, var(--glass-bg), rgba(255,255,255,0.01));
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    box-shadow: inset 0 1px 0 var(--glass-highlight), inset 0 -3px 6px rgba(0,0,0,0.1), 0 10px 25px var(--shadow-color);
-    position: relative; overflow: hidden; cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: inset 0 1px 0 var(--glass-highlight), inset 0 -3px 6px rgba(0,0,0,0.05), 0 10px 25px var(--shadow-color);
+    position: relative; overflow: hidden; cursor: pointer; transition: all 0.25s ease;
+    text-align: center; text-transform: uppercase; letter-spacing: 1px;
 }
 .menu-btn::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 50%;
-    background: linear-gradient(rgba(255,255,255,0.15), rgba(255,255,255,0)); border-radius: 15px 15px 0 0;
+    content: ''; position: absolute; top: 0; left: 5%; right: 5%; height: 40%;
+    background: linear-gradient(rgba(255,255,255,0.12), rgba(255,255,255,0)); border-radius: 40px 40px 0 0;
 }
 .menu-btn:active {
-    transform: translateY(2px); box-shadow: inset 0 2px 5px rgba(0,0,0,0.2), 0 5px 10px var(--shadow-color);
+    transform: scale(0.97) translateY(1px); box-shadow: inset 0 2px 5px rgba(0,0,0,0.15), 0 5px 10px var(--shadow-color);
     border-color: var(--accent-color); color: var(--accent-color);
 }
 .btn-main { border-color: var(--accent-color); }
@@ -79,26 +77,26 @@ h1 { font-size: 46px; margin-bottom: 35px; color: var(--accent-color); text-shad
 #gameScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .game-header { width: 320px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 #score { font-size: 24px; font-weight: 800; color: var(--text-color); opacity: 0.8; }
-.exit-btn { background: #ff3344; color: white; border: none; padding: 10px 20px; font-weight: 700; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 15px rgba(255,51,68,0.3); }
+.exit-btn { background: #ff3344; color: white; border: none; padding: 10px 22px; font-weight: 700; border-radius: 25px; cursor: pointer; box-shadow: 0 4px 15px rgba(255,51,68,0.3); transition: transform 0.1s; }
+.exit-btn:active { transform: scale(0.95); }
 
-canvas { border: 2px solid var(--panel-border); background: #000000; width: 320px; height: 320px; border-radius: 14px; box-shadow: 0 15px 35px var(--shadow-color); }
+canvas { border: 2px solid var(--panel-border); background: #000000; width: 320px; height: 320px; border-radius: 16px; box-shadow: 0 15px 35px var(--shadow-color); }
 .controls { display: grid; grid-template-columns: repeat(3, 75px); gap: 14px; margin-top: 25px; }
 .ctrl-btn {
     width: 75px; height: 75px; background: var(--glass-bg); border: 1px solid var(--glass-border);
-    color: var(--text-color); font-size: 26px; border-radius: 18px; cursor: pointer;
+    color: var(--text-color); font-size: 26px; border-radius: 50%; cursor: pointer;
     backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
     box-shadow: inset 0 1px 0 var(--glass-highlight), 0 8px 20px var(--shadow-color);
-    transition: all 0.2s;
+    transition: all 0.15s;
 }
-.ctrl-btn:active { border-color: var(--accent-color); color: var(--accent-color); transform: scale(0.95); }
-.content-box { width: 85%; max-width: 320px; background: var(--panel-bg); border-radius: 20px; padding: 25px; text-align: center; border: 1px solid var(--panel-border); backdrop-filter: blur(20px); box-shadow: 0 20px 40px var(--shadow-color); }
+.ctrl-btn:active { border-color: var(--accent-color); color: var(--accent-color); transform: scale(0.9); }
+.content-box { width: 85%; max-width: 320px; background: var(--panel-bg); border-radius: 24px; padding: 25px; text-align: center; border: 1px solid var(--panel-border); backdrop-filter: blur(20px); box-shadow: 0 20px 40px var(--shadow-color); }
 .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
 #historyList { max-height: 160px; overflow-y: auto; margin-top: 15px; }
-.history-item { background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 10px; margin: 8px 0; border-radius: 10px; font-size: 16px; font-weight: 600; }
+.history-item { background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 10px; margin: 8px 0; border-radius: 12px; font-size: 15px; font-weight: 600; }
 </style>
 </head>
 <body>
-<!-- ВЕРХНЯЯ ПАНЕЛЬ С ЧАСАМИ И СМЕНОЙ ТЕМЫ -->
 <div class="top-bar">
     <div class="widget theme-toggle" id="themeBtn" onclick="toggleTheme()">☀️ Светлая</div>
     <div class="widget" id="moscowTime">МСК: --:--:--</div>
@@ -106,9 +104,9 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
 
 <div id="mainMenu" class="screen">
     <h1>ЗМЕЙКА</h1>
-    <button class="menu-btn btn-main" onclick="openScreen('gameScreen'); startGame();">ИГРАТЬ</button>
-    <button class="menu-btn" onclick="openScreen('achievementsScreen')">ДОСТИЖЕНИЯ</button>
-    <button class="menu-btn" onclick="openScreen('historyScreen'); showHistory();">ИСТОРИЯ ИГР</button>
+    <button class="menu-btn btn-main" onclick="openScreen('gameScreen'); startGame();">Играть</button>
+    <button class="menu-btn" onclick="openScreen('achievementsScreen')">Достижения</button>
+    <button class="menu-btn" onclick="openScreen('historyScreen'); showHistory();">История игр</button>
 </div>
 
 <div id="gameScreen" class="screen hidden">
@@ -154,34 +152,22 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
     var tg = window.Telegram.WebApp;
     if (tg) { tg.ready(); tg.expand(); }
 
-    // ЛОГИКА ТОЧНОГО МОСКОВСКОГО ВРЕМЕНИ
     function updateMoscowTime() {
         var now = new Date();
-        // Переводим локальное время компьютера в МСК (UTC+3)
         var moscow = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (3 * 3600000));
-        var hours = moscow.getHours();
-        var minutes = moscow.getMinutes();
-        var seconds = moscow.getSeconds();
-        
-        if (hours < 10) hours = "0" + hours;
-        if (minutes < 10) minutes = "0" + minutes;
-        if (seconds < 10) seconds = "0" + seconds;
-        
-        document.getElementById("moscowTime").innerText = "МСК: " + hours + ":" + minutes + ":" + seconds;
+        var h = moscow.getHours(); var m = moscow.getMinutes(); var s = moscow.getSeconds();
+        if (h < 10) h = "0" + h; if (m < 10) m = "0" + m; if (s < 10) s = "0" + s;
+        document.getElementById("moscowTime").innerText = "МСК: " + h + ":" + m + ":" + s;
     }
-    setInterval(updateMoscowTime, 1000);
-    updateMoscowTime();
+    setInterval(updateMoscowTime, 1000); updateMoscowTime();
 
-    // СМЕНА ТЕМЫ СВЕТЛАЯ / ТЁМНАЯ
     function toggleTheme() {
         var currentTheme = document.body.getAttribute("data-theme");
         var btn = document.getElementById("themeBtn");
         if (currentTheme === "light") {
-            document.body.removeAttribute("data-theme");
-            btn.innerText = "☀️ Светлая";
+            document.body.removeAttribute("data-theme"); btn.innerText = "☀️ Светлая";
         } else {
-            document.body.setAttribute("data-theme", "light");
-            btn.innerText = "🌙 Тёмная";
+            document.body.setAttribute("data-theme", "light"); btn.innerText = "🌙 Тёмная";
         }
     }
 
@@ -196,17 +182,13 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
 
     var canvas = document.getElementById("gameCanvas");
     var ctx = canvas.getContext("2d");
-    var grid = 16; 
     
     var score = 0;
     var gameLoop = null;
     var snakeStr = ""; 
-    var headX = 96;
-    var headY = 80;
-    var dx = 16;
-    var dy = 0;
-    var foodX = 0;
-    var foodY = 0;
+    var headX = 96; var headY = 80;
+    var dx = 16; var dy = 0;
+    var foodX = 0; var foodY = 0;
     var isPaused = false;
 
     function startGame() {
@@ -219,25 +201,11 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
         gameLoop = setInterval(updateGame, 160); 
     }
 
-    function stopGame() {
-        if (gameLoop) { clearInterval(gameLoop); gameLoop = null; }
-    }
+    function stopGame() { if (gameLoop) { clearInterval(gameLoop); gameLoop = null; } }
 
-    function pauseAndConfirmExit() {
-        isPaused = true;
-        document.getElementById('exitModal').className = 'modal';
-    }
-
-    function resumeGame() {
-        isPaused = false; 
-        document.getElementById('exitModal').className = 'modal hidden';
-    }
-
-    function confirmExit() {
-        document.getElementById('exitModal').className = 'modal hidden';
-        saveMatchToHistory(score);
-        stopGame(); openScreen('mainMenu');
-    }
+    function pauseAndConfirmExit() { isPaused = true; document.getElementById('exitModal').className = 'modal'; }
+    function resumeGame() { isPaused = false; document.getElementById('exitModal').className = 'modal hidden'; }
+    function confirmExit() { document.getElementById('exitModal').className = 'modal hidden'; saveMatchToHistory(score); stopGame(); openScreen('mainMenu'); }
 
     function generateFood() {
         foodX = Math.floor(Math.random() * 19 + 1) * 16;
@@ -249,41 +217,31 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
         var currentHeadStr = headX + "_" + headY;
         headX = headX + dx; headY = headY + dy;
 
-        if (headX < 0 || headX >= 320 || headY < 0 || headY >= 320) {
-            endGameAction(); return;
-        }
-        var checkCollisionStr = headX + "_" + headY;
-        if (snakeStr.indexOf(checkCollisionStr) !== -1) {
-            endGameAction(); return;
-        }
+        if (headX < 0 || headX >= 320 || headY < 0 || headY >= 320) { endGameAction(); return; }
+        if (snakeStr.indexOf(headX + "_" + headY) !== -1) { endGameAction(); return; }
+        
         if (snakeStr !== "") { snakeStr = currentHeadStr + "," + snakeStr; } 
         else { snakeStr = currentHeadStr; }
 
         if (headX === foodX && headY === foodY) {
-            score = score + 10;
-            document.getElementById('score').innerText = "Счет: " + score;
-            generateFood();
+            score = score + 10; document.getElementById('score').innerText = "Счет: " + score; generateFood();
         } else {
             var lastComma = snakeStr.lastIndexOf(",");
             if (lastComma !== -1) { snakeStr = snakeStr.substring(0, lastComma); }
         }
 
         ctx.fillStyle = "#000000"; ctx.fillRect(0, 0, 320, 320); 
-        ctx.fillStyle = "#FF0033"; ctx.fillRect(foodX, foodY, 14, 14); 
-        ctx.fillStyle = "#00FF00"; ctx.fillRect(headX, headY, 14, 14); 
+        ctx.fillStyle = "#FF0033"; ctx.fillRect(foodX, foodY, 14, 14); // НЕОНОВОЕ ЯБЛОКО
+        ctx.fillStyle = "#00FF00"; ctx.fillRect(headX, headY, 14, 14); // НЕОНОВАЯ ГОЛОВА
 
+        // ЖЕЛЕЗОБЕТОННЫЙ РЕНДЕРИНГ: Посимвольное чтение строки через регулярное выражение, без split и массивов
         ctx.fillStyle = "#33FF33";
-        var renderStr = snakeStr + ",";
-        while (renderStr.indexOf(",") !== -1) {
-            var commaPos = renderStr.indexOf(",");
-            var singleCoord = renderStr.substring(0, commaPos);
-            renderStr = renderStr.substring(commaPos + 1);
-            if (singleCoord !== "") {
-                var linePos = singleCoord.indexOf("_");
-                var bodyX = parseInt(singleCoord.substring(0, linePos), 10);
-                var bodyY = parseInt(singleCoord.substring(linePos + 1), 10);
-                ctx.fillRect(bodyX, bodyY, 14, 14);
-            }
+        var match;
+        var regex = /(\d+)_(\d+)/g;
+        while ((match = regex.exec(snakeStr)) !== null) {
+            var bodyX = parseInt(match[1], 10);
+            var bodyY = parseInt(match[2], 10);
+            ctx.fillRect(bodyX, bodyY, 14, 14); // НЕОНОВОЕ ТЕЛО
         }
     }
 
@@ -296,18 +254,17 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
     }
 
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') { changeDir('up'); }
-        if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') { changeDir('down'); }
-        if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { changeDir('left'); }
-        if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { changeDir('right'); }
-        if (e.key === 'Escape') { pauseAndConfirmExit(); }
+        if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') changeDir('up');
+        if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') changeDir('down');
+        if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') changeDir('left');
+        if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') changeDir('right');
+        if (e.key === 'Escape') pauseAndConfirmExit();
     });
 
     function saveMatchToHistory(finalScore) {
         var existingHistory = localStorage.getItem('snake_history');
         var historyArray = existingHistory ? existingHistory.split(',') : [];
-        historyArray.unshift(finalScore);
-        if (historyArray.length > 10) { historyArray.pop(); }
+        historyArray.unshift(finalScore); if (historyArray.length > 10) historyArray.pop();
         localStorage.setItem('snake_history', historyArray.join(','));
     }
 
@@ -315,20 +272,14 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
         var container = document.getElementById('historyList');
         var rawData = localStorage.getItem('snake_history');
         if (!rawData) { container.innerHTML = "Нет сыгранных матчей"; return; }
-        var scores = rawData.split(',');
-        var htmlContent = "";
+        var scores = rawData.split(','); var htmlContent = "";
         for (var i = 0; i < scores.length; i++) {
-            var matchNum = i + 1;
-            htmlContent += "<div class='history-item'>Игра #" + matchNum + " — " + scores[i] + " очков</div>";
+            var matchNum = i + 1; htmlContent += "<div class='history-item'>Игра #" + matchNum + " — " + scores[i] + " очков</div>";
         }
         container.innerHTML = htmlContent;
     }
 
-    function endGameAction() {
-        alert("Игра окончена! Ваш счет: " + score);
-        saveMatchToHistory(score);
-        stopGame(); openScreen('mainMenu');
-    }
+    function endGameAction() { alert("Игра окончена! Ваш счет: " + score); saveMatchToHistory(score); stopGame(); openScreen('mainMenu'); }
 </script>
 </body>
 </html>
