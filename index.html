@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Snake HTML Grid</title>
+<title>Snake Game Official Fix</title>
 <script src="https://telegram.org"></script>
 <style>
 body {
@@ -39,19 +39,11 @@ h1 { font-size: 42px; margin-bottom: 30px; color: #00FF00; text-shadow: 0 0 10px
     background: #FF0033; color: white; border: none;
     padding: 8px 16px; font-weight: bold; border-radius: 8px; cursor: pointer; z-index: 20;
 }
-#gameBoard {
-    display: grid;
-    grid-template-columns: repeat(20, 1fr);
-    grid-template-rows: repeat(20, 1fr);
-    width: 320px; height: 320px;
-    background: #000000;
-    border: 2px solid #333;
-    border-radius: 10px;
+.exit-btn:active { background: #cc0029; }
+canvas {
+    border: 2px solid #333; background: #000000;
+    width: 320px; height: 320px; border-radius: 10px;
 }
-.cell { background: #000000; border: 1px solid #111; box-sizing: border-box; }
-.snake-head { background: #00FF00 !important; border-radius: 3px; box-shadow: 0 0 8px #00FF00; }
-.snake-body { background: #33FF33 !important; border-radius: 2px; }
-.food { background: #FF0033 !important; border-radius: 50%; box-shadow: 0 0 8px #FF0033; }
 .controls { display: grid; grid-template-columns: repeat(3, 75px); gap: 12px; margin-top: 20px; }
 .ctrl-btn {
     width: 75px; height: 75px; background: #252525; border: none;
@@ -89,7 +81,7 @@ h1 { font-size: 42px; margin-bottom: 30px; color: #00FF00; text-shadow: 0 0 10px
         <div id="score">Счет: 0</div>
         <button class="exit-btn" onclick="pauseAndConfirmExit()">Выход</button>
     </div>
-    <div id="gameBoard"></div>
+    <canvas id="gameCanvas" width="320" height="320"></canvas>
     <div class="controls">
         <button class="ctrl-btn" style="grid-column:2;" onclick="changeDir('up')">▲</button>
         <button class="ctrl-btn" style="grid-column:1;" onclick="changeDir('left')">◀</button>
@@ -136,36 +128,35 @@ h1 { font-size: 42px; margin-bottom: 30px; color: #00FF00; text-shadow: 0 0 10px
         if (screenId !== 'gameScreen') { stopGame(); }
     }
 
-    var board = document.getElementById("gameBoard");
+    var canvas = document.getElementById("gameCanvas");
+    var ctx = canvas.getContext("2d");
+    var grid = 16; 
+    
     var score = 0;
     var gameLoop = null;
     
-    var boardHtml = "";
-    for (var cellId = 0; cellId < 400; cellId++) {
-        boardHtml += "<div class='cell' id='c" + cellId + "'></div>";
-    }
-    board.innerHTML = boardHtml;
-
+    // Лента координат змейки хранится обычной строкой: "X_Y,X_Y,X_Y"
     var snakeStr = ""; 
-    var headX = 6;
-    var headY = 5;
+    var headX = 96;
+    var headY = 80;
     
-    var dx = 1;
+    var dx = 16;
     var dy = 0;
     var foodX = 0;
     var foodY = 0;
     var isPaused = false;
 
     function startGame() {
-        score = 0; dx = 1; dy = 0; headX = 6; headY = 5; isPaused = false;
+        score = 0; dx = 16; dy = 0; headX = 96; headY = 80; isPaused = false;
         document.getElementById('score').innerText = "Счет: " + score;
         document.getElementById('exitModal').className = 'modal hidden';
         
-        snakeStr = "5_5,4_5,"; 
+        // Начальный хвост змейки текстовой строкой
+        snakeStr = "80_80,64_80"; 
         generateFood();
         
         if (gameLoop) { clearInterval(gameLoop); }
-        gameLoop = setInterval(updateGame, 180); 
+        gameLoop = setInterval(updateGame, 160); 
     }
 
     function stopGame() {
@@ -189,78 +180,79 @@ h1 { font-size: 42px; margin-bottom: 30px; color: #00FF00; text-shadow: 0 0 10px
     }
 
     function generateFood() {
-        foodX = Math.floor(Math.random() * 18 + 1);
-        foodY = Math.floor(Math.random() * 18 + 1);
+        foodX = Math.floor(Math.random() * 19 + 1) * 16;
+        foodY = Math.floor(Math.random() * 19 + 1) * 16;
     }
 
     function updateGame() {
         if (isPaused) return;
 
-        var currentHeadStr = headX + "_" + headY + ",";
+        // Сохраняем текущую позицию головы перед шагом
+        var currentHeadStr = headX + "_" + headY;
+
+        // Делаем шаг головы вперед
         headX = headX + dx; 
         headY = headY + dy;
 
-        if (headX < 0 || headX >= 20 || headY < 0 || headY >= 20) {
+        // Проверка выхода за границы Canvas (320x320 пикселей)
+        if (headX < 0 || headX >= 320 || headY < 0 || headY >= 320) {
             endGameAction(); return;
         }
 
-        var nextHeadStr = headX + "_" + headY + ",";
-        if (snakeStr.indexOf(nextHeadStr) !== -1) {
+        // Проверка столкновения головы с собственным хвостом
+        var checkCollisionStr = headX + "_" + headY;
+        if (snakeStr.indexOf(checkCollisionStr) !== -1) {
             endGameAction(); return;
         }
 
-        snakeStr = currentHeadStr + snakeStr;
+        // Добавляем старое положение головы в начало строки хвоста
+        if (snakeStr !== "") {
+            snakeStr = currentHeadStr + "," + snakeStr;
+        } else {
+            snakeStr = currentHeadStr;
+        }
 
+        // Логика съедания яблока
         if (headX === foodX && headY === foodY) {
             score = score + 10;
             document.getElementById('score').innerText = "Счет: " + score;
             generateFood();
         } else {
-            var cleanStr = snakeStr.substring(0, snakeStr.length - 1);
-            var lastComma = cleanStr.lastIndexOf(",");
+            // Отрезаем последний элемент хвоста из строки координат
+            var lastComma = snakeStr.lastIndexOf(",");
             if (lastComma !== -1) {
-                snakeStr = snakeStr.substring(0, lastComma + 1);
+                snakeStr = snakeStr.substring(0, lastComma);
             }
         }
 
-        for (var cleanId = 0; cleanId < 400; cleanId++) {
-            document.getElementById("c" + cleanId).className = "cell";
-        }
+        // СБРОС И ОТРИСОВКА КАНВАСА
+        ctx.fillStyle = "#000000"; ctx.fillRect(0, 0, 320, 320); // Заливка поля чёрным
         
-        var foodIndex = (foodY * 20) + foodX;
-        document.getElementById("c" + foodIndex).className = "cell food";
+        // Рисуем неоново-красную еду
+        ctx.fillStyle = "#FF0033"; ctx.fillRect(foodX, foodY, 14, 14);
         
-        var headIndex = (headY * 20) + headX;
-        document.getElementById("c" + headIndex).className = "cell snake-head";
+        // Рисуем неоново-зеленую голову змейки
+        ctx.fillStyle = "#00FF00"; ctx.fillRect(headX, headY, 14, 14);
 
-        var tempStr = snakeStr;
-        while (tempStr.indexOf(",") !== -1) {
-            var commaIndex = tempStr.indexOf(",");
-            var singleSegment = tempStr.substring(0, commaIndex);
-            tempStr = tempStr.substring(commaIndex + 1);
-            
-            if (singleSegment !== "") {
-                var underscoreIndex = singleSegment.indexOf("_");
-                var textX = singleSegment.substring(0, underscoreIndex);
-                var textY = singleSegment.substring(underscoreIndex + 1);
-                
-                var partX = parseInt(textX, 10);
-                var partY = parseInt(textY, 10);
-                
-                var bodyIndex = (partY * 20) + partX;
-                if (bodyIndex >= 0 && bodyIndex < 400) {
-                    document.getElementById("c" + bodyIndex).className = "cell snake-body";
-                }
+        // Пошагово парсим строку координат и рисуем яркое тело змейки
+        ctx.fillStyle = "#33FF33";
+        var segments = snakeStr.split(",");
+        for (var i = 0; i < segments.length; i++) {
+            if (segments[i] !== "") {
+                var coords = segments[i].split("_");
+                var partX = parseInt(coords[0], 10); // Жёсткий индекс X
+                var partY = parseInt(coords[1], 10); // Жёсткий индекс Y
+                ctx.fillRect(partX, partY, 14, 14);
             }
         }
     }
 
     function changeDir(direction) {
         if (isPaused) return;
-        if (direction === 'left' && dx === 0) { dx = -1; dy = 0; }
-        if (direction === 'up' && dy === 0) { dx = 0; dy = -1; }
-        if (direction === 'right' && dx === 0) { dx = 1; dy = 0; }
-        if (direction === 'down' && dy === 0) { dx = 0; dy = 1; }
+        if (direction === 'left' && dx === 0) { dx = -16; dy = 0; }
+        if (direction === 'up' && dy === 0) { dx = 0; dy = -16; }
+        if (direction === 'right' && dx === 0) { dx = 16; dy = 0; }
+        if (direction === 'down' && dy === 0) { dx = 0; dy = 16; }
     }
 
     document.addEventListener('keydown', function(e) {
