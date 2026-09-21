@@ -221,8 +221,8 @@ canvas {
         for (var i = 0; i < segments.length; i++) {
             if (segments[i] !== "") {
                 var coords = segments[i].split("_");
-                var x = parseInt(coords[0], 10);
-                var y = parseInt(coords[1], 10);
+                var x = parseInt(coords[0], 10); // ИСПРАВЛЕНО: берем первый элемент (X)
+                var y = parseInt(coords[1], 10); // ИСПРАВЛЕНО: берем второй элемент (Y)
                 ctx.fillRect(x, y, 14, 14);
             }
         }
