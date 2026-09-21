@@ -221,9 +221,9 @@ canvas {
         for (var i = 0; i < segments.length; i++) {
             if (segments[i] !== "") {
                 var coords = segments[i].split("_");
-                var x = parseInt(coords[0], 10); // ИСПРАВЛЕНО: берем первый элемент (X)
-                var y = parseInt(coords[1], 10); // ИСПРАВЛЕНО: берем второй элемент (Y)
-                ctx.fillRect(x, y, 14, 14);
+                var xX = parseInt(coords.shift(), 10); // Жестко берем первое значение X
+                var yY = parseInt(coords.pop(), 10);   // Жестко берем последнее значение Y
+                ctx.fillRect(xX, yY, 14, 14);
             }
         }
     }
