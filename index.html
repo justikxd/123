@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Snake Game Glass</title>
+<title>Snake Ultimate Grid</title>
 <script src="https://telegram.org"></script>
 <style>
 :root {
@@ -13,77 +13,118 @@
     --glass-highlight: rgba(255, 255, 255, 0.15); --shadow-color: rgba(0, 0, 0, 0.5);
     --accent-color: #00ff00;
 }
-[data-theme="light"] {
-    --bg-color: #e0e4e8; --text-color: #1a1a1a;
-    --panel-bg: rgba(0, 0, 0, 0.02); --panel-border: rgba(0, 0, 0, 0.1);
-    --glass-bg: rgba(255, 255, 255, 0.4); --glass-border: rgba(255, 255, 255, 0.3);
-    --glass-highlight: rgba(255, 255, 255, 0.6); --shadow-color: rgba(163, 177, 198, 0.6);
-    --accent-color: #00aa00;
-}
 body {
     margin: 0; background: var(--bg-color); color: var(--text-color);
     display: flex; flex-direction: column; align-items: center;
     justify-content: center; height: 100vh; font-family: -apple-system, sans-serif;
-    overflow: hidden; user-select: none; transition: background 0.3s;
+    overflow: hidden; user-select: none;
 }
-.widget-bar { width: 320px; display: flex; justify-content: flex-start; margin-bottom: 20px; }
+.top-bar {
+    position: absolute; top: 15px; left: 15px; right: 15px;
+    display: flex; justify-content: space-between; align-items: center; z-index: 50;
+}
 .widget {
-    padding: 8px 16px; border-radius: 30px; font-size: 13px; font-weight: 600;
+    padding: 8px 16px; border-radius: 30px; font-size: 14px; font-weight: 700;
     background: var(--glass-bg); border: 1px solid var(--glass-border);
     backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
 }
-.theme-toggle { cursor: pointer; }
-.screen { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; }
+.screen { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: var(--bg-color); z-index: 10; }
 .hidden { display: none !important; }
-h1 { font-size: 46px; margin-bottom: 25px; color: var(--accent-color); text-shadow: 0 0 15px var(--accent-color); font-weight: 800; }
+h1 { font-size: 42px; margin-bottom: 20px; color: var(--accent-color); text-shadow: 0 0 10px var(--accent-color); font-weight: 800; text-align: center; }
+h2 { font-size: 24px; margin-bottom: 15px; color: #fff; }
 
 .menu-btn {
-    width: 260px; padding: 16px; margin: 10px; color: var(--text-color);
-    font-size: 16px; font-weight: 750; border-radius: 40px !important; border: 1px solid var(--glass-border);
+    width: 260px; padding: 14px; margin: 8px; color: var(--text-color);
+    font-size: 15px; font-weight: 750; border-radius: 40px !important; border: 1px solid var(--glass-border);
     background: linear-gradient(135deg, var(--glass-bg), rgba(255,255,255,0.01));
-    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    box-shadow: inset 0 1px 0 var(--glass-highlight), 0 10px 25px var(--shadow-color);
+    backdrop-filter: blur(12px); box-shadow: inset 0 1px 0 var(--glass-highlight), 0 8px 20px var(--shadow-color);
     cursor: pointer; text-align: center; text-transform: uppercase; letter-spacing: 1px;
 }
 .menu-btn:active { transform: scale(0.97); border-color: var(--accent-color); color: var(--accent-color); }
 .btn-main { border-color: var(--accent-color); }
 
 .game-header { width: 320px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-#score { font-size: 24px; font-weight: 800; }
-.exit-btn { background: #ff3344; color: white; border: none; padding: 10px 22px; font-weight: 700; border-radius: 25px; cursor: pointer; box-shadow: 0 4px 15px rgba(255,51,68,0.3); }
+#score, #gameCoins { font-size: 20px; font-weight: 800; }
+.exit-btn { background: #ff3344; color: white; border: none; padding: 8px 18px; font-weight: 700; border-radius: 25px; cursor: pointer; }
 
-canvas { border: 2px solid var(--panel-border); background: #000000; width: 320px; height: 320px; border-radius: 16px; box-shadow: 0 15px 35px var(--shadow-color); }
-.controls { display: grid; grid-template-columns: repeat(3, 75px); gap: 14px; margin-top: 20px; }
+#gameBoard {
+    display: grid; width: 320px; height: 320px; background: #000000;
+    border: 2px solid var(--panel-border); border-radius: 14px; box-shadow: 0 15px 35px var(--shadow-color);
+}
+.cell { background: #000; border: 1px solid #111; display: flex; align-items: center; justify-content: center; }
+
+.controls { display: grid; grid-template-columns: repeat(3, 75px); gap: 12px; margin-top: 20px; }
 .ctrl-btn { width: 75px; height: 75px; background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-color); font-size: 26px; border-radius: 50%; cursor: pointer; }
-.ctrl-btn:active { border-color: var(--accent-color); color: var(--accent-color); }
-.content-box { width: 85%; max-width: 320px; background: var(--panel-bg); border-radius: 24px; padding: 25px; text-align: center; border: 1px solid var(--panel-border); }
+.content-box { width: 85%; max-width: 320px; background: var(--panel-bg); border-radius: 24px; padding: 20px; text-align: center; border: 1px solid var(--panel-border); }
 .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-#historyList { max-height: 160px; overflow-y: auto; margin-top: 15px; }
-.history-item { background: var(--glass-bg); padding: 10px; margin: 8px 0; border-radius: 12px; font-size: 15px; }
+
+.setting-row { margin: 15px 0; font-size: 16px; font-weight: 600; }
+.setting-select { background: #222; color: #fff; border: 1px solid #444; padding: 6px 12px; border-radius: 15px; font-weight: bold; font-size: 14px; margin-left: 10px; }
+.shop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 15px 0; max-height: 200px; overflow-y: auto; padding: 5px; }
+.shop-item { background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 10px; border-radius: 14px; cursor: pointer; font-size: 14px; font-weight: bold; }
+.shop-item.active { border-color: var(--accent-color); background: rgba(0,255,0,0.05); }
+#historyList { max-height: 150px; overflow-y: auto; margin-top: 10px; }
+.history-item { background: var(--glass-bg); padding: 8px; margin: 5px 0; border-radius: 10px; font-size: 14px; }
 </style>
 </head>
 <body>
+<div class="top-bar">
+    <div class="widget" id="topBalance">🪙 0</div>
+</div>
+
+<!-- ГЛАВНОЕ МЕНЮ -->
 <div id="mainMenu" class="screen">
-    <div class="widget-bar">
-        <div class="widget theme-toggle" onclick="toggleTheme()">☀️ Тема</div>
-    </div>
-    <h1>ЗМЕЙКА</h1>
+    <h1>ЗМЕЙКА PLUS</h1>
     <button class="menu-btn btn-main" onclick="openScreen('gameScreen'); startGame();">Играть</button>
-    <button class="menu-btn" onclick="openScreen('achievementsScreen')">Достижения</button>
+    <button class="menu-btn" onclick="openScreen('settingsScreen')">Размер поля</button>
+    <button class="menu-btn" onclick="openScreen('shopScreen'); loadShop();">Магазин скинов</button>
     <button class="menu-btn" onclick="openScreen('historyScreen'); showHistory();">История игр</button>
 </div>
 
+<!-- ЭКРАН ИГРЫ -->
 <div id="gameScreen" class="screen hidden">
     <div class="game-header">
-        <div id="score">Счет: 0</div>
+        <div id="score">🍏 0</div>
+        <div id="gameCoins">🪙 0</div>
         <button class="exit-btn" onclick="pauseAndConfirmExit()">Выход</button>
     </div>
-    <canvas id="gameCanvas" width="320" height="320"></canvas>
+    <div id="gameBoard"></div>
     <div class="controls">
         <button class="ctrl-btn" style="grid-column:2;" onclick="changeDir('up')">▲</button>
         <button class="ctrl-btn" style="grid-column:1;" onclick="changeDir('left')">◀</button>
         <button class="ctrl-btn" style="grid-column:3;" onclick="changeDir('right')">▶</button>
         <button class="ctrl-btn" style="grid-column:2;" onclick="changeDir('down')">▼</button>
+    </div>
+</div>
+
+<!-- НАСТРОЙКИ СЕТКИ (ОТ 6х6 ДО 16х16) -->
+<div id="settingsScreen" class="screen hidden">
+    <div class="content-box">
+        <h2>⚙️ Размер поля</h2>
+        <div class="setting-row">
+            <span>Размер сетки:</span>
+            <select id="gridSizeSelect" class="setting-select">
+                <option value="6">6 x 6 (Микро)</option>
+                <option value="8">8 x 8 (Компакт)</option>
+                <option value="10" selected>10 x 10 (Стандарт)</option>
+                <option value="12">12 x 12 (Большое)</option>
+                <option value="14">14 x 14 (Широкое)</option>
+                <option value="16">16 x 16 (Максимум)</option>
+            </select>
+        </div>
+        <button class="menu-btn btn-main" onclick="openScreen('mainMenu')">Сохранить</button>
+    </div>
+</div>
+
+<!-- МАГАЗИН СКИНОВ -->
+<div id="shopScreen" class="screen hidden">
+    <div class="content-box" style="max-width:340px; width:90%;">
+        <h2>🛒 Магазин скинов</h2>
+        <div style="font-size:14px; font-weight:700; color:#aaa; margin-bottom:5px;">Скины на еду (Цена: 50 🪙)</div>
+        <div class="shop-grid" id="foodShopGrid"></div>
+        <div style="font-size:14px; font-weight:700; color:#aaa; margin-top:10px; margin-bottom:5px;">Цвета змейки (Цена: 100 🪙)</div>
+        <div class="shop-grid" id="snakeShopGrid"></div>
+        <button class="menu-btn btn-main" onclick="openScreen('mainMenu')" style="width:100%; margin:10px 0 0 0;">В меню</button>
     </div>
 </div>
 
@@ -93,15 +134,6 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
         <p>Вы уверены, что хотите выйти? Прогресс будет потерян.</p>
         <button class="menu-btn btn-main" onclick="resumeGame()">Продолжить</button>
         <button class="menu-btn" style="background:#ff3344; border-color:#ff3344; color:white;" onclick="confirmExit()">Да, выйти</button>
-    </div>
-</div>
-
-<div id="achievementsScreen" class="screen hidden">
-    <div class="content-box">
-        <h2>🏆 Достижения</h2>
-        <p>🍏 Первый перекус</p>
-        <p>🐍 Длинный хвост</p>
-        <button class="menu-btn" style="width:100%;" onclick="openScreen('mainMenu')">Назад</button>
     </div>
 </div>
 
@@ -116,106 +148,128 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
     var tg = window.Telegram.WebApp;
     if (tg) { tg.ready(); tg.expand(); }
 
-    function toggleTheme() {
-        var currentTheme = document.body.getAttribute("data-theme");
-        if (currentTheme === "light") { document.body.removeAttribute("data-theme"); } 
-        else { document.body.setAttribute("data-theme", "light"); }
-    }
-
     function openScreen(screenId) {
         document.getElementById('mainMenu').className = 'screen hidden';
         document.getElementById('gameScreen').className = 'screen hidden';
-        document.getElementById('achievementsScreen').className = 'screen hidden';
+        document.getElementById('settingsScreen').className = 'screen hidden';
+        document.getElementById('shopScreen').className = 'screen hidden';
         document.getElementById('historyScreen').className = 'screen hidden';
         document.getElementById(screenId).className = 'screen';
         if (screenId !== 'gameScreen') { stopGame(); }
+        updateBalanceWidgets();
     }
 
-    var canvas = document.getElementById("gameCanvas");
-    var ctx = canvas.getContext("2d");
-    var grid = 16; 
+    var score = 0; var earnedCoins = 0; var gameLoop = null; var isPaused = false;
+    var currentGridSize = 10;
     
-    var score = 0;
-    var gameLoop = null;
-    
-    // Безопасное хранение координат через текстовую строку
-    var snakeStr = ""; 
-    var headX = 96; var headY = 80;
-    var dx = 16; var dy = 0;
-    var foodX = 0; var foodY = 0;
-    var isPaused = false;
+    var totalCoins = parseInt(localStorage.getItem('snake_total_coins') || '0', 10);
+    var currentFoodSkin = localStorage.getItem('active_food_skin') || '🍏';
+    var currentSnakeColor = localStorage.getItem('active_snake_color') || '#00FF00';
+    var purchasedSkins = localStorage.getItem('bought_skins') || '🍏,#00FF00';
+
+    var snakeStr = ""; var headX = 3; var headY = 3; var dx = 1; var dy = 0; var foodX = 0; var foodY = 0;
+
+    function updateBalanceWidgets() {
+        document.getElementById('topBalance').innerText = "🪙 " + totalCoins;
+    }
+    updateBalanceWidgets();
+
+    function buildGrid() {
+        var board = document.getElementById("gameBoard");
+        board.innerHTML = "";
+        board.style.gridTemplateColumns = "repeat(" + currentGridSize + ", 1fr)";
+        board.style.gridTemplateRows = "repeat(" + currentGridSize + ", 1fr)";
+        
+        var totalCells = currentGridSize * currentGridSize;
+        var html = "";
+        for (var i = 0; i < totalCells; i++) {
+            html += "<div class='cell' id='cell_" + i + "'></div>";
+        }
+        board.innerHTML = html;
+    }
 
     function startGame() {
-        score = 0; dx = 16; dy = 0; headX = 96; headY = 80; isPaused = false;
-        document.getElementById('score').innerText = "Счет: " + score;
+        score = 0; earnedCoins = 0; dx = 1; dy = 0; headX = 3; headY = 3; isPaused = false;
+        currentGridSize = parseInt(document.getElementById('gridSizeSelect').value, 10);
+        
+        document.getElementById('score').innerText = currentFoodSkin + " 0";
+        document.getElementById('gameCoins').innerText = "🪙 " + earnedCoins;
         document.getElementById('exitModal').className = 'modal hidden';
         
-        snakeStr = "80_80,64_80"; 
+        buildGrid();
+        snakeStr = "2_3,1_3,"; 
         generateFood();
+        
         if (gameLoop) { clearInterval(gameLoop); }
-        gameLoop = setInterval(updateGame, 160); 
+        gameLoop = setInterval(updateGame, 180); 
     }
 
     function stopGame() { if (gameLoop) { clearInterval(gameLoop); gameLoop = null; } }
     function pauseAndConfirmExit() { isPaused = true; document.getElementById('exitModal').className = 'modal'; }
     function resumeGame() { isPaused = false; document.getElementById('exitModal').className = 'modal hidden'; }
-    function confirmExit() { document.getElementById('exitModal').className = 'modal hidden'; saveMatchToHistory(score); stopGame(); openScreen('mainMenu'); }
+    function confirmExit() { document.getElementById('exitModal').className = 'modal hidden'; addCoins(earnedCoins); saveMatchToHistory(score); stopGame(); openScreen('mainMenu'); }
 
     function generateFood() {
-        foodX = Math.floor(Math.random() * 19 + 1) * 16;
-        foodY = Math.floor(Math.random() * 19 + 1) * 16;
+        foodX = Math.floor(Math.random() * (currentGridSize - 2) + 1);
+        foodY = Math.floor(Math.random() * (currentGridSize - 2) + 1);
     }
 
     function updateGame() {
         if (isPaused) return;
+        var currentHeadStr = headX + "_" + headY + ",";
+        headX = headX + dx; headY = headY + dy;
 
-        var currentHeadStr = headX + "_" + headY;
-        headX = headX + dx; 
-        headY = headY + dy;
+        if (headX < 0 || headX >= currentGridSize || headY < 0 || headY >= currentGridSize) { endGameAction(); return; }
+        if (snakeStr.indexOf(headX + "_" + headY + ",") !== -1) { endGameAction(); return; }
 
-        if (headX < 0 || headX >= 320 || headY < 0 || headY >= 320) { endGameAction(); return; }
-        
-        var checkCollisionStr = headX + "_" + headY;
-        if (snakeStr.indexOf(checkCollisionStr) !== -1) { endGameAction(); return; }
-        
-        if (snakeStr !== "") { snakeStr = currentHeadStr + "," + snakeStr; } 
-        else { snakeStr = currentHeadStr; }
+        snakeStr = currentHeadStr + snakeStr;
 
         if (headX === foodX && headY === foodY) {
-            score = score + 10; 
-            document.getElementById('score').innerText = "Счет: " + score; 
+            score = score + 1;
+            earnedCoins = earnedCoins + 2; 
+            document.getElementById('score').innerText = currentFoodSkin + " " + score;
+            document.getElementById('gameCoins').innerText = "🪙 " + earnedCoins;
             generateFood();
         } else {
-            var lastComma = snakeStr.lastIndexOf(",");
-            if (lastComma !== -1) { snakeStr = snakeStr.substring(0, lastComma); }
+            var lastComma = snakeStr.substring(0, snakeStr.length - 1).lastIndexOf(",");
+            if (lastComma !== -1) { snakeStr = snakeStr.substring(0, lastComma + 1); }
         }
 
-        // РЕНДЕРИНГ ГРАФИКИ
-        ctx.fillStyle = "#000000"; ctx.fillRect(0, 0, 320, 320); 
-        ctx.fillStyle = "#FF0033"; ctx.fillRect(foodX, foodY, 14, 14); // ЕДА
-        ctx.fillStyle = "#00FF00"; ctx.fillRect(headX, headY, 14, 14); // ГОЛОВА
+        var cellsCount = currentGridSize * currentGridSize;
+        for (var c = 0; c < cellsCount; c++) {
+            var el = document.getElementById("cell_" + c);
+            if (el) { el.innerHTML = ""; el.style.background = "#000000"; el.style.boxShadow = "none"; }
+        }
 
-        ctx.fillStyle = "#33FF33";
-        var renderStr = snakeStr + ",";
-        while (renderStr.indexOf(",") !== -1) {
-            var commaPos = renderStr.indexOf(",");
-            var singleCoord = renderStr.substring(0, commaPos);
-            renderStr = renderStr.substring(commaPos + 1);
-            if (singleCoord !== "") {
-                var linePos = singleCoord.indexOf("_");
-                var textX = singleCoord.substring(0, linePos);
-                var textY = singleCoord.substring(linePos + 1);
-                ctx.fillRect(Number(textX), Number(textY), 14, 14); // ТЕЛО
+        var foodIndex = foodY * currentGridSize + foodX;
+        var foodCell = document.getElementById("cell_" + foodIndex);
+        if (foodCell) { foodCell.innerHTML = currentFoodSkin; foodCell.style.fontSize = "16px"; }
+
+        var headIndex = headY * currentGridSize + headX;
+        var headCell = document.getElementById("cell_" + headIndex);
+        if (headCell) { headCell.style.background = currentSnakeColor; headCell.style.boxShadow = "0 0 8px " + currentSnakeColor; }
+
+        var tempStr = snakeStr;
+        while (tempStr.indexOf(",") !== -1) {
+            var commaIndex = tempStr.indexOf(",");
+            var seg = tempStr.substring(0, commaIndex);
+            tempStr = tempStr.substring(commaIndex + 1);
+            if (seg !== "") {
+                var uIndex = seg.indexOf("_");
+                var px = parseInt(seg.substring(0, uIndex), 10);
+                var py = parseInt(seg.substring(uIndex + 1), 10);
+                var bodyIndex = py * currentGridSize + px;
+                var bodyCell = document.getElementById("cell_" + bodyIndex);
+                if (bodyCell) { bodyCell.style.background = currentSnakeColor; }
             }
         }
     }
-
     function changeDir(direction) {
         if (isPaused) return;
-        if (direction === 'left' && dx === 0) { dx = -16; dy = 0; }
-        if (direction === 'up' && dy === 0) { dx = 0; dy = -16; }
-        if (direction === 'right' && dx === 0) { dx = 16; dy = 0; }
-        if (direction === 'down' && dx === 0) { dx = 0; dy = 16; }
+        if (direction === 'left' && dx === 0) { dx = -1; dy = 0; }
+        if (direction === 'up' && dy === 0) { dx = 0; dy = -1; }
+        if (direction === 'right' && dx === 0) { dx = 1; dy = 0; }
+        if (direction === 'down' && dy === 0) { dx = 0; dy = 1; }
     }
 
     document.addEventListener('keydown', function(e) {
@@ -225,6 +279,71 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
         if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') changeDir('right');
         if (e.key === 'Escape') pauseAndConfirmExit();
     });
+
+    function addCoins(amount) {
+        totalCoins = totalCoins + amount;
+        localStorage.setItem('snake_total_coins', totalCoins);
+        updateBalanceWidgets();
+    }
+
+    var foodSkins = ["🍏", "🍌", "🍅", "🍍", "🍉", "🍓"];
+    var snakeColors = ["#00FF00", "#00FFFF", "#FF00FF", "#FFFF00", "#FF5252", "#ffffff"];
+
+    function loadShop() {
+        var foodGrid = document.getElementById('foodShopGrid');
+        var snakeGrid = document.getElementById('snakeShopGrid');
+        foodGrid.innerHTML = ""; snakeGrid.innerHTML = "";
+
+        foodSkins.forEach(function(skin) {
+            var isBought = purchasedSkins.indexOf(skin) !== -1;
+            var isActive = currentFoodSkin === skin;
+            var text = skin + (isActive ? " (Акт.)" : (isBought ? " (Одеть)" : " [50 🪙]"));
+            var item = document.createElement('div');
+            item.className = "shop-item" + (isActive ? " active" : "");
+            item.innerText = text;
+            item.onclick = function() { buyOrEquipFood(skin, isBought); };
+            foodGrid.appendChild(item);
+        });
+
+        snakeColors.forEach(function(color) {
+            var isBought = purchasedSkins.indexOf(color) !== -1;
+            var isActive = currentSnakeColor === color;
+            var label = color === "#00FF00" ? "Зелёный" : (color === "#00FFFF" ? "Голубой" : (color === "#FF00FF" ? "Розовый" : (color === "#FFFF00" ? "Жёлтый" : "Скин")));
+            var text = label + (isActive ? " (Акт.)" : (isBought ? " (Одеть)" : " [100 🪙]"));
+            var item = document.createElement('div');
+            item.className = "shop-item" + (isActive ? " active" : "");
+            item.style.color = color;
+            item.innerText = text;
+            item.onclick = function() { buyOrEquipSnake(color, isBought); };
+            snakeGrid.appendChild(item);
+        });
+    }
+
+    function buyOrEquipFood(skin, isBought) {
+        if (currentFoodSkin === skin) return;
+        if (isBought) {
+            currentFoodSkin = skin; localStorage.setItem('active_food_skin', skin);
+        } else {
+            if (totalCoins >= 50) {
+                addCoins(-50); purchasedSkins += "," + skin; localStorage.setItem('bought_skins', purchasedSkins);
+                currentFoodSkin = skin; localStorage.setItem('active_food_skin', skin);
+            } else { alert("Недостаточно монет!"); }
+        }
+        loadShop();
+    }
+
+    function buyOrEquipSnake(color, isBought) {
+        if (currentSnakeColor === color) return;
+        if (isBought) {
+            currentSnakeColor = color; localStorage.setItem('active_snake_color', color);
+        } else {
+            if (totalCoins >= 100) {
+                addCoins(-100); purchasedSkins += "," + color; localStorage.setItem('bought_skins', purchasedSkins);
+                currentSnakeColor = color; localStorage.setItem('active_snake_color', color);
+            } else { alert("Недостаточно монет!"); }
+        }
+        loadShop();
+    }
 
     function saveMatchToHistory(finalScore) {
         var existingHistory = localStorage.getItem('snake_history');
@@ -244,7 +363,7 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
         container.innerHTML = htmlContent;
     }
 
-    function endGameAction() { alert("Игра окончена! Ваш счет: " + score); saveMatchToHistory(score); stopGame(); openScreen('mainMenu'); }
+    function endGameAction() { alert("Игра окончена! Вы заработали: " + earnedCoins + " 🪙"); addCoins(earnedCoins); saveMatchToHistory(score); stopGame(); openScreen('mainMenu'); }
 </script>
 </body>
 </html>
