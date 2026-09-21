@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Snake Game Official Fix</title>
+<title>Snake Game Glass</title>
 <script src="https://telegram.org"></script>
 <style>
 :root {
@@ -138,26 +138,19 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
     var score = 0;
     var gameLoop = null;
     
-    // Списочные массивы без использования символов квадратных скобок в коде логики
-    var snakeX = new Array();
-    var snakeY = new Array();
-    
+    // Безопасное хранение координат через текстовую строку
+    var snakeStr = ""; 
+    var headX = 96; var headY = 80;
     var dx = 16; var dy = 0;
     var foodX = 0; var foodY = 0;
     var isPaused = false;
 
     function startGame() {
-        score = 0; dx = 16; dy = 0; isPaused = false;
+        score = 0; dx = 16; dy = 0; headX = 96; headY = 80; isPaused = false;
         document.getElementById('score').innerText = "Счет: " + score;
         document.getElementById('exitModal').className = 'modal hidden';
         
-        snakeX = new Array();
-        snakeY = new Array();
-        
-        snakeX.push(96); snakeY.push(80);
-        snakeX.push(80); snakeY.push(80);
-        snakeX.push(64); snakeY.push(80);
-        
+        snakeStr = "80_80,64_80"; 
         generateFood();
         if (gameLoop) { clearInterval(gameLoop); }
         gameLoop = setInterval(updateGame, 160); 
@@ -176,52 +169,44 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
     function updateGame() {
         if (isPaused) return;
 
-        // Безопасное чтение головы (индекс 0) через нативный метод без квадратных скобок
-        var headX = snakeX.concat().shift();
-        var headY = snakeY.concat().shift();
+        var currentHeadStr = headX + "_" + headY;
+        headX = headX + dx; 
+        headY = headY + dy;
+
+        if (headX < 0 || headX >= 320 || headY < 0 || headY >= 320) { endGameAction(); return; }
         
-        var nextX = headX + dx;
-        var nextY = headY + dy;
-
-        if (nextX < 0 || nextX >= 320 || nextY < 0 || nextY >= 320) { endGameAction(); return; }
+        var checkCollisionStr = headX + "_" + headY;
+        if (snakeStr.indexOf(checkCollisionStr) !== -1) { endGameAction(); return; }
         
-        // Проверка самопересечения через безопасный срез
-        for (var i = 1; i < snakeX.length; i++) {
-            var compX = snakeX.concat().slice(i, i + 1).shift();
-            var compY = snakeY.concat().slice(i, i + 1).shift();
-            if (nextX === compX && nextY === compY) {
-                endGameAction(); return;
-            }
-        }
+        if (snakeStr !== "") { snakeStr = currentHeadStr + "," + snakeStr; } 
+        else { snakeStr = currentHeadStr; }
 
-        // Двигаем змейку: вставляем новую голову вперед
-        snakeX.unshift(nextX);
-        snakeY.unshift(nextY);
-
-        if (nextX === foodX && nextY === foodY) {
+        if (headX === foodX && headY === foodY) {
             score = score + 10; 
             document.getElementById('score').innerText = "Счет: " + score; 
             generateFood();
         } else {
-            // Отрезаем хвост
-            snakeX.pop();
-            snakeY.pop();
+            var lastComma = snakeStr.lastIndexOf(",");
+            if (lastComma !== -1) { snakeStr = snakeStr.substring(0, lastComma); }
         }
 
-        // ОТРИСОВКА
+        // РЕНДЕРИНГ ГРАФИКИ
         ctx.fillStyle = "#000000"; ctx.fillRect(0, 0, 320, 320); 
-        ctx.fillStyle = "#FF0033"; ctx.fillRect(foodX, foodY, 14, 14); 
+        ctx.fillStyle = "#FF0033"; ctx.fillRect(foodX, foodY, 14, 14); // ЕДА
+        ctx.fillStyle = "#00FF00"; ctx.fillRect(headX, headY, 14, 14); // ГОЛОВА
 
-        // Отрисовка змейки безопасным методом без рисков для парсера
-        for (var k = 0; k < snakeX.length; k++) {
-            var drawX = snakeX.concat().slice(k, k + 1).shift();
-            var drawY = snakeY.concat().slice(k, k + 1).shift();
-            if (k === 0) {
-                ctx.fillStyle = "#00FF00"; // ГОЛОВА
-            } else {
-                ctx.fillStyle = "#33FF33"; // ТЕЛО
+        ctx.fillStyle = "#33FF33";
+        var renderStr = snakeStr + ",";
+        while (renderStr.indexOf(",") !== -1) {
+            var commaPos = renderStr.indexOf(",");
+            var singleCoord = renderStr.substring(0, commaPos);
+            renderStr = renderStr.substring(commaPos + 1);
+            if (singleCoord !== "") {
+                var linePos = singleCoord.indexOf("_");
+                var textX = singleCoord.substring(0, linePos);
+                var textY = singleCoord.substring(linePos + 1);
+                ctx.fillRect(Number(textX), Number(textY), 14, 14); // ТЕЛО
             }
-            ctx.fillRect(drawX, drawY, 14, 14);
         }
     }
 
