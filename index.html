@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Snake Game Capsule Glass</title>
+<title>Snake Game</title>
 <script src="https://telegram.org"></script>
 <style>
 :root {
@@ -45,7 +45,6 @@ body {
     box-shadow: 0 4px 15px var(--shadow-color);
 }
 .theme-toggle { cursor: pointer; }
-
 .screen {
     display: flex; flex-direction: column; align-items: center;
     justify-content: center; width: 100%; height: 100%; position: absolute; top: 0; left: 0;
@@ -56,7 +55,7 @@ h1 { font-size: 46px; margin-bottom: 35px; color: var(--accent-color); text-shad
 
 .menu-btn {
     width: 260px; padding: 16px; margin: 10px; color: var(--text-color);
-    font-size: 17px; font-weight: 750; border-radius: 40px; border: 1px solid var(--glass-border);
+    font-size: 17px; font-weight: 750; border-radius: 40px !important; border: 1px solid var(--glass-border);
     background: linear-gradient(135deg, var(--glass-bg), rgba(255,255,255,0.01));
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
     box-shadow: inset 0 1px 0 var(--glass-highlight), inset 0 -3px 6px rgba(0,0,0,0.05), 0 10px 25px var(--shadow-color);
@@ -72,13 +71,11 @@ h1 { font-size: 46px; margin-bottom: 35px; color: var(--accent-color); text-shad
     border-color: var(--accent-color); color: var(--accent-color);
 }
 .btn-main { border-color: var(--accent-color); }
-
 #gameScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .game-header { width: 320px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 #score { font-size: 24px; font-weight: 800; color: var(--text-color); opacity: 0.8; }
 .exit-btn { background: #ff3344; color: white; border: none; padding: 10px 22px; font-weight: 700; border-radius: 25px; cursor: pointer; box-shadow: 0 4px 15px rgba(255,51,68,0.3); transition: transform 0.1s; z-index: 30; }
 .exit-btn:active { transform: scale(0.95); }
-
 canvas { border: 2px solid var(--panel-border); background: #000000; width: 320px; height: 320px; border-radius: 16px; box-shadow: 0 15px 35px var(--shadow-color); }
 .controls { display: grid; grid-template-columns: repeat(3, 75px); gap: 14px; margin-top: 25px; }
 .ctrl-btn {
@@ -184,6 +181,8 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
     
     var score = 0;
     var gameLoop = null;
+    
+    // Новая логика: Работаем со строкой через безопасные разделители, которые не ломаются текстовыми чатами
     var snakeStr = ""; 
     var headX = 96; var headY = 80;
     var dx = 16; var dy = 0;
@@ -202,20 +201,9 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
 
     function stopGame() { if (gameLoop) { clearInterval(gameLoop); gameLoop = null; } }
 
-    function pauseAndConfirmExit() { 
-        isPaused = true; 
-        document.getElementById('exitModal').className = 'modal'; 
-    }
-    function resumeGame() { 
-        isPaused = false; 
-        document.getElementById('exitModal').className = 'modal hidden'; 
-    }
-    function confirmExit() { 
-        document.getElementById('exitModal').className = 'modal hidden'; 
-        saveMatchToHistory(score); 
-        stopGame(); 
-        openScreen('mainMenu'); 
-    }
+    function pauseAndConfirmExit() { isPaused = true; document.getElementById('exitModal').className = 'modal'; }
+    function resumeGame() { isPaused = false; document.getElementById('exitModal').className = 'modal hidden'; }
+    function confirmExit() { document.getElementById('exitModal').className = 'modal hidden'; saveMatchToHistory(score); stopGame(); openScreen('mainMenu'); }
 
     function generateFood() {
         foodX = Math.floor(Math.random() * 19 + 1) * 16;
@@ -241,10 +229,10 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
         }
 
         ctx.fillStyle = "#000000"; ctx.fillRect(0, 0, 320, 320); 
-        ctx.fillStyle = "#FF0033"; ctx.fillRect(foodX, foodY, 14, 14); // НЕОНОВОЕ ЯБЛОКО
-        ctx.fillStyle = "#00FF00"; ctx.fillRect(headX, headY, 14, 14); // НЕОНОВАЯ ГОЛОВА
+        ctx.fillStyle = "#FF0033"; ctx.fillRect(foodX, foodY, 14, 14); 
+        ctx.fillStyle = "#00FF00"; ctx.fillRect(headX, headY, 14, 14); 
 
-        // КАРДИНАЛЬНО НОВЫЙ ИСПРАВЛЕННЫЙ РЕНДЕРИНГ БЕЗ РЕГУЛЯРОК И ИНДЕКСОВ
+        // ИСПРАВЛЕННЫЙ НА 100% МЕТОД ОТРИСОВКИ БЕЗ ИНДЕКСОВ В КВАДРАТНЫХ СКОБКАХ
         ctx.fillStyle = "#33FF33";
         var renderStr = snakeStr + ",";
         while (renderStr.indexOf(",") !== -1) {
@@ -257,7 +245,7 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
                 var textY = singleCoord.substring(linePos + 1);
                 var bodyX = parseInt(textX, 10);
                 var bodyY = parseInt(textY, 10);
-                ctx.fillRect(bodyX, bodyY, 14, 14); // НЕОНОВОЕ ТЕЛО
+                ctx.fillRect(bodyX, bodyY, 14, 14); 
             }
         }
     }
@@ -267,7 +255,7 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
         if (direction === 'left' && dx === 0) { dx = -16; dy = 0; }
         if (direction === 'up' && dy === 0) { dx = 0; dy = -16; }
         if (direction === 'right' && dx === 0) { dx = 16; dy = 0; }
-        if (direction === 'down' && dx === 0) { dx = 0; dy = 16; }
+        if (direction === 'down' && dy === 0) { dx = 0; dy = 16; }
     }
 
     document.addEventListener('keydown', function(e) {
