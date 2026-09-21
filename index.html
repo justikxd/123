@@ -3,102 +3,71 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Snake Game</title>
+<title>Snake Capsule Official</title>
 <script src="https://telegram.org"></script>
 <style>
 :root {
-    --bg-color: #121212;
-    --text-color: #ffffff;
-    --panel-bg: rgba(255, 255, 255, 0.03);
-    --panel-border: rgba(255, 255, 255, 0.08);
-    --glass-bg: rgba(255, 255, 255, 0.05);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --glass-highlight: rgba(255, 255, 255, 0.15);
-    --shadow-color: rgba(0, 0, 0, 0.5);
+    --bg-color: #121212; --text-color: #ffffff;
+    --panel-bg: rgba(255, 255, 255, 0.03); --panel-border: rgba(255, 255, 255, 0.08);
+    --glass-bg: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-highlight: rgba(255, 255, 255, 0.15); --shadow-color: rgba(0, 0, 0, 0.5);
     --accent-color: #00ff00;
 }
 [data-theme="light"] {
-    --bg-color: #e0e4e8;
-    --text-color: #1a1a1a;
-    --panel-bg: rgba(0, 0, 0, 0.02);
-    --panel-border: rgba(0, 0, 0, 0.1);
-    --glass-bg: rgba(255, 255, 255, 0.4);
-    --glass-border: rgba(255, 255, 255, 0.3);
-    --glass-highlight: rgba(255, 255, 255, 0.6);
-    --shadow-color: rgba(163, 177, 198, 0.6);
+    --bg-color: #e0e4e8; --text-color: #1a1a1a;
+    --panel-bg: rgba(0, 0, 0, 0.02); --panel-border: rgba(0, 0, 0, 0.1);
+    --glass-bg: rgba(255, 255, 255, 0.4); --glass-border: rgba(255, 255, 255, 0.3);
+    --glass-highlight: rgba(255, 255, 255, 0.6); --shadow-color: rgba(163, 177, 198, 0.6);
     --accent-color: #00aa00;
 }
 body {
     margin: 0; background: var(--bg-color); color: var(--text-color);
     display: flex; flex-direction: column; align-items: center;
     justify-content: center; height: 100vh; font-family: -apple-system, sans-serif;
-    overflow: hidden; user-select: none; transition: background 0.3s, color 0.3s;
+    overflow: hidden; user-select: none; transition: background 0.3s;
 }
-.top-bar {
-    position: absolute; top: 15px; left: 15px; right: 15px;
-    display: flex; justify-content: space-between; align-items: center; z-index: 50;
-}
+.widget-bar { width: 320px; display: flex; justify-content: space-between; margin-bottom: 20px; }
 .widget {
-    padding: 8px 16px; border-radius: 30px; font-size: 14px; font-weight: 600;
+    padding: 8px 16px; border-radius: 30px; font-size: 13px; font-weight: 600;
     background: var(--glass-bg); border: 1px solid var(--glass-border);
     backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 4px 15px var(--shadow-color);
 }
 .theme-toggle { cursor: pointer; }
-.screen {
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: center; width: 100%; height: 100%; position: absolute; top: 0; left: 0;
-    background: var(--bg-color); z-index: 10; transition: background 0.3s;
-}
+.screen { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; }
 .hidden { display: none !important; }
-h1 { font-size: 46px; margin-bottom: 35px; color: var(--accent-color); text-shadow: 0 0 15px var(--accent-color); font-weight: 800; letter-spacing: 2px; }
+h1 { font-size: 46px; margin-bottom: 25px; color: var(--accent-color); text-shadow: 0 0 15px var(--accent-color); font-weight: 800; }
 
 .menu-btn {
     width: 260px; padding: 16px; margin: 10px; color: var(--text-color);
-    font-size: 17px; font-weight: 750; border-radius: 40px !important; border: 1px solid var(--glass-border);
+    font-size: 16px; font-weight: 750; border-radius: 40px !important; border: 1px solid var(--glass-border);
     background: linear-gradient(135deg, var(--glass-bg), rgba(255,255,255,0.01));
     backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-    box-shadow: inset 0 1px 0 var(--glass-highlight), inset 0 -3px 6px rgba(0,0,0,0.05), 0 10px 25px var(--shadow-color);
-    position: relative; overflow: hidden; cursor: pointer; transition: all 0.25s ease;
-    text-align: center; text-transform: uppercase; letter-spacing: 1px;
+    box-shadow: inset 0 1px 0 var(--glass-highlight), 0 10px 25px var(--shadow-color);
+    cursor: pointer; text-align: center; text-transform: uppercase; letter-spacing: 1px;
 }
-.menu-btn::before {
-    content: ''; position: absolute; top: 0; left: 5%; right: 5%; height: 40%;
-    background: linear-gradient(rgba(255,255,255,0.12), rgba(255,255,255,0)); border-radius: 40px 40px 0 0;
-}
-.menu-btn:active {
-    transform: scale(0.97) translateY(1px); box-shadow: inset 0 2px 5px rgba(0,0,0,0.15), 0 5px 10px var(--shadow-color);
-    border-color: var(--accent-color); color: var(--accent-color);
-}
+.menu-btn:active { transform: scale(0.97); border-color: var(--accent-color); color: var(--accent-color); }
 .btn-main { border-color: var(--accent-color); }
-#gameScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
 .game-header { width: 320px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-#score { font-size: 24px; font-weight: 800; color: var(--text-color); opacity: 0.8; }
-.exit-btn { background: #ff3344; color: white; border: none; padding: 10px 22px; font-weight: 700; border-radius: 25px; cursor: pointer; box-shadow: 0 4px 15px rgba(255,51,68,0.3); transition: transform 0.1s; z-index: 30; }
-.exit-btn:active { transform: scale(0.95); }
+#score { font-size: 24px; font-weight: 800; }
+.exit-btn { background: #ff3344; color: white; border: none; padding: 10px 22px; font-weight: 700; border-radius: 25px; cursor: pointer; box-shadow: 0 4px 15px rgba(255,51,68,0.3); }
+
 canvas { border: 2px solid var(--panel-border); background: #000000; width: 320px; height: 320px; border-radius: 16px; box-shadow: 0 15px 35px var(--shadow-color); }
-.controls { display: grid; grid-template-columns: repeat(3, 75px); gap: 14px; margin-top: 25px; }
-.ctrl-btn {
-    width: 75px; height: 75px; background: var(--glass-bg); border: 1px solid var(--glass-border);
-    color: var(--text-color); font-size: 26px; border-radius: 50%; cursor: pointer;
-    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    box-shadow: inset 0 1px 0 var(--glass-highlight), 0 8px 20px var(--shadow-color);
-    transition: all 0.15s;
-}
-.ctrl-btn:active { border-color: var(--accent-color); color: var(--accent-color); transform: scale(0.9); }
-.content-box { width: 85%; max-width: 320px; background: var(--panel-bg); border-radius: 24px; padding: 25px; text-align: center; border: 1px solid var(--panel-border); backdrop-filter: blur(20px); box-shadow: 0 20px 40px var(--shadow-color); }
-.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+.controls { display: grid; grid-template-columns: repeat(3, 75px); gap: 14px; margin-top: 20px; }
+.ctrl-btn { width: 75px; height: 75px; background: var(--glass-bg); border: 1px solid var(--glass-border); color: var(--text-color); font-size: 26px; border-radius: 50%; cursor: pointer; }
+.ctrl-btn:active { border-color: var(--accent-color); color: var(--accent-color); }
+.content-box { width: 85%; max-width: 320px; background: var(--panel-bg); border-radius: 24px; padding: 25px; text-align: center; border: 1px solid var(--panel-border); }
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
 #historyList { max-height: 160px; overflow-y: auto; margin-top: 15px; }
-.history-item { background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 10px; margin: 8px 0; border-radius: 12px; font-size: 15px; font-weight: 600; }
+.history-item { background: var(--glass-bg); padding: 10px; margin: 8px 0; border-radius: 12px; font-size: 15px; }
 </style>
 </head>
 <body>
-<div class="top-bar">
-    <div class="widget theme-toggle" id="themeBtn" onclick="toggleTheme()">☀️ Светлая</div>
-    <div class="widget" id="moscowTime">МСК: --:--:--</div>
-</div>
-
 <div id="mainMenu" class="screen">
+    <div class="widget-bar">
+        <div class="widget theme-toggle" onclick="toggleTheme()">☀️ Тема</div>
+        <div class="widget classMoscow">МСК: --:--:--</div>
+    </div>
     <h1>ЗМЕЙКА</h1>
     <button class="menu-btn btn-main" onclick="openScreen('gameScreen'); startGame();">Играть</button>
     <button class="menu-btn" onclick="openScreen('achievementsScreen')">Достижения</button>
@@ -108,6 +77,7 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
 <div id="gameScreen" class="screen hidden">
     <div class="game-header">
         <div id="score">Счет: 0</div>
+        <div class="widget classMoscow" style="margin:0;">МСК: --:--:--</div>
         <button class="exit-btn" onclick="pauseAndConfirmExit()">Выход</button>
     </div>
     <canvas id="gameCanvas" width="320" height="320"></canvas>
@@ -124,7 +94,7 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
         <h2>Игра на паузе ⏸</h2>
         <p>Вы уверены, что хотите выйти? Прогресс будет потерян.</p>
         <button class="menu-btn btn-main" onclick="resumeGame()">Продолжить</button>
-        <button class="menu-btn" style="background:#ff3344; border-color:#ff3344; color: white;" onclick="confirmExit()">Да, выйти</button>
+        <button class="menu-btn" style="background:#ff3344; border-color:#ff3344; color:white;" onclick="confirmExit()">Да, выйти</button>
     </div>
 </div>
 
@@ -153,18 +123,15 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
         var msk = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (3 * 3600000));
         var h = msk.getHours(); var m = msk.getMinutes(); var s = msk.getSeconds();
         if (h < 10) h = "0" + h; if (m < 10) m = "0" + m; if (s < 10) s = "0" + s;
-        document.getElementById("moscowTime").innerText = "МСК: " + h + ":" + m + ":" + s;
+        var clocks = document.getElementsByClassName("classMoscow");
+        for (var i = 0; i < clocks.length; i++) { clocks[i].innerText = "МСК: " + h + ":" + m + ":" + s; }
     }
     setInterval(updateMoscowTime, 1000); updateMoscowTime();
 
     function toggleTheme() {
         var currentTheme = document.body.getAttribute("data-theme");
-        var btn = document.getElementById("themeBtn");
-        if (currentTheme === "light") {
-            document.body.removeAttribute("data-theme"); btn.innerText = "☀️ Светлая";
-        } else {
-            document.body.setAttribute("data-theme", "light"); btn.innerText = "🌙 Тёмная";
-        }
+        if (currentTheme === "light") { document.body.removeAttribute("data-theme"); } 
+        else { document.body.setAttribute("data-theme", "light"); }
     }
 
     function openScreen(screenId) {
@@ -178,29 +145,38 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
 
     var canvas = document.getElementById("gameCanvas");
     var ctx = canvas.getContext("2d");
+    var grid = 16; 
     
     var score = 0;
     var gameLoop = null;
     
-    // Новая логика: Работаем со строкой через безопасные разделители, которые не ломаются текстовыми чатами
-    var snakeStr = ""; 
-    var headX = 96; var headY = 80;
+    // ЖЕЛЕЗОБЕТОННЫЕ ЧИСТЫЕ МАССИВЫ ДЛЯ КООРДИНАТ БЕЗ СТРОК И ОПАСНЫХ СИМВОЛОВ
+    var sBodyX = new Array();
+    var sBodyY = new Array();
+    
     var dx = 16; var dy = 0;
     var foodX = 0; var foodY = 0;
     var isPaused = false;
 
     function startGame() {
-        score = 0; dx = 16; dy = 0; headX = 96; headY = 80; isPaused = false;
+        score = 0; dx = 16; dy = 0; isPaused = false;
         document.getElementById('score').innerText = "Счет: " + score;
         document.getElementById('exitModal').className = 'modal hidden';
-        snakeStr = "80_80,64_80"; 
+        
+        sBodyX = new Array();
+        sBodyY = new Array();
+        
+        // Задаем начальные три точки змейки цифрами через явный push
+        sBodyX.push(96); sBodyY.push(80);
+        sBodyX.push(80); sBodyY.push(80);
+        sBodyX.push(64); sBodyY.push(80);
+        
         generateFood();
         if (gameLoop) { clearInterval(gameLoop); }
         gameLoop = setInterval(updateGame, 160); 
     }
 
     function stopGame() { if (gameLoop) { clearInterval(gameLoop); gameLoop = null; } }
-
     function pauseAndConfirmExit() { isPaused = true; document.getElementById('exitModal').className = 'modal'; }
     function resumeGame() { isPaused = false; document.getElementById('exitModal').className = 'modal hidden'; }
     function confirmExit() { document.getElementById('exitModal').className = 'modal hidden'; saveMatchToHistory(score); stopGame(); openScreen('mainMenu'); }
@@ -212,41 +188,49 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
 
     function updateGame() {
         if (isPaused) return;
-        var currentHeadStr = headX + "_" + headY;
-        headX = headX + dx; headY = headY + dy;
 
-        if (headX < 0 || headX >= 320 || headY < 0 || headY >= 320) { endGameAction(); return; }
-        if (snakeStr.indexOf(headX + "_" + headY) !== -1) { endGameAction(); return; }
+        // Рассчитываем шаг следующей головы по первому элементу массивов (индекс 0)
+        var headX = sBodyX.unshift() + dx; // Временный сдвиг заменен на явное чтение ниже
+        var nextX = sBodyX.concat().shift() + dx;
+        var nextY = sBodyY.concat().shift() + dy;
+
+        if (nextX < 0 || nextX >= 320 || nextY < 0 || nextY >= 320) { endGameAction(); return; }
         
-        if (snakeStr !== "") { snakeStr = currentHeadStr + "," + snakeStr; } 
-        else { snakeStr = currentHeadStr; }
-
-        if (headX === foodX && headY === foodY) {
-            score = score + 10; document.getElementById('score').innerText = "Счет: " + score; generateFood();
-        } else {
-            var lastComma = snakeStr.lastIndexOf(",");
-            if (lastComma !== -1) { snakeStr = snakeStr.substring(0, lastComma); }
+        // Проверка самопересечения
+        for (var i = 0; i < sBodyX.length; i++) {
+            if (nextX === sBodyX.concat().slice(i, i+1).shift() && nextY === sBodyY.concat().slice(i, i+1).shift()) {
+                endGameAction(); return;
+            }
         }
 
-        ctx.fillStyle = "#000000"; ctx.fillRect(0, 0, 320, 320); 
-        ctx.fillStyle = "#FF0033"; ctx.fillRect(foodX, foodY, 14, 14); 
-        ctx.fillStyle = "#00FF00"; ctx.fillRect(headX, headY, 14, 14); 
+        // Вставляем новую голову вперед массивов через unshift
+        sBodyX.unshift(nextX);
+        sBodyY.unshift(nextY);
 
-        // ИСПРАВЛЕННЫЙ НА 100% МЕТОД ОТРИСОВКИ БЕЗ ИНДЕКСОВ В КВАДРАТНЫХ СКОБКАХ
-        ctx.fillStyle = "#33FF33";
-        var renderStr = snakeStr + ",";
-        while (renderStr.indexOf(",") !== -1) {
-            var commaPos = renderStr.indexOf(",");
-            var singleCoord = renderStr.substring(0, commaPos);
-            renderStr = renderStr.substring(commaPos + 1);
-            if (singleCoord !== "") {
-                var linePos = singleCoord.indexOf("_");
-                var textX = singleCoord.substring(0, linePos);
-                var textY = singleCoord.substring(linePos + 1);
-                var bodyX = parseInt(textX, 10);
-                var bodyY = parseInt(textY, 10);
-                ctx.fillRect(bodyX, bodyY, 14, 14); 
+        if (nextX === foodX && nextY === foodY) {
+            score = score + 10; 
+            document.getElementById('score').innerText = "Счет: " + score; 
+            generateFood();
+        } else {
+            // Удаляем хвост, если яблоко не съели
+            sBodyX.pop();
+            sBodyY.pop();
+        }
+
+        // ОТРИСОВКА НА КАНВАСЕ
+        ctx.fillStyle = "#000000"; ctx.fillRect(0, 0, 320, 320); 
+        ctx.fillStyle = "#FF0033"; ctx.fillRect(foodX, foodY, 14, 14); // НЕОНОВАЯ ЕДА
+
+        // Отрисовка змейки из чистых числовых массивов без split и парсинга строк
+        for (var k = 0; k < sBodyX.length; k++) {
+            var activeX = sBodyX.concat().slice(k, k+1).shift();
+            var activeY = sBodyY.concat().slice(k, k+1).shift();
+            if (k === 0) {
+                ctx.fillStyle = "#00FF00"; // ГОЛОВА
+            } else {
+                ctx.fillStyle = "#33FF33"; // ТЕЛО
             }
+            ctx.fillRect(activeX, activeY, 14, 14);
         }
     }
 
@@ -255,7 +239,7 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
         if (direction === 'left' && dx === 0) { dx = -16; dy = 0; }
         if (direction === 'up' && dy === 0) { dx = 0; dy = -16; }
         if (direction === 'right' && dx === 0) { dx = 16; dy = 0; }
-        if (direction === 'down' && dy === 0) { dx = 0; dy = 16; }
+        if (direction === 'down' && dx === 0) { dx = 0; dy = 16; }
     }
 
     document.addEventListener('keydown', function(e) {
