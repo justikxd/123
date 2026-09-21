@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Snake Game PC Fix</title>
+    <title>Snake Game Fixed Official</title>
     <script src="https://telegram.org"></script>
     <style>
         body {
@@ -30,6 +30,7 @@
         .game-header { width: 320px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         #score { font-size: 24px; font-weight: bold; color: #aaa; }
         .exit-btn { background: #FF5252; color: white; border: none; padding: 8px 16px; font-weight: bold; border-radius: 8px; cursor: pointer; }
+        .exit-btn:active { background: #d32f2f; }
         
         canvas { border: 2px solid #333; background: #000; width: 320px; height: 320px; border-radius: 10px; }
         .controls { display: grid; grid-template-columns: repeat(3, 75px); gap: 12px; margin-top: 20px; }
@@ -96,10 +97,7 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        if (tg) {
-            tg.ready(); 
-            tg.expand();
-        }
+        if (tg) { tg.ready(); tg.expand(); }
 
         function openScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
@@ -114,8 +112,10 @@
         let score = 0;
         let gameLoop = null;
         
-        // Надежное создание змейки через список объектов координат
-        let snake = [];
+        let snakeCoordinatesString = "";
+        let headX = 96;
+        let headY = 80;
+        
         let dx = grid;
         let dy = 0;
         let foodX = 0;
@@ -126,15 +126,13 @@
             score = 0;
             dx = grid;
             dy = 0;
+            headX = 96;
+            headY = 80;
             isPaused = false;
             document.getElementById('score').innerText = "Счет: " + score;
             document.getElementById('exitModal').classList.add('hidden');
             
-            // Наполнение змейки через явные методы
-            snake = [];
-            snake.push({x: 80, y: 80});
-            snake.push({x: 64, y: 80});
-            snake.push({x: 48, y: 80});
+            snakeCoordinatesString = "80_80,64_80";
             
             generateFood();
             
@@ -170,50 +168,56 @@
         function updateGame() {
             if (isPaused) return;
 
-            // Голова змейки — первый элемент в списке
-            const head = snake[0];
-            const nextX = head.x + dx;
-            const nextY = head.y + dy;
+            let oldHeadStr = headX + "_" + headY;
+            if (snakeCoordinatesString !== "") {
+                snakeCoordinatesString = oldHeadStr + "," + snakeCoordinatesString;
+            } else {
+                snakeCoordinatesString = oldHeadStr;
+            }
 
-            // Проверка столкновения со стенами
-            if (nextX < 0 || nextX >= canvas.width || nextY < 0 || nextY >= canvas.height) {
+            headX = headX + dx;
+            headY = headY + dy;
+
+            if (headX < 0 || headX >= canvas.width || headY < 0 || headY >= canvas.height) {
                 endGameAction();
                 return;
             }
 
-            // Проверка столкновения с хвостом
-            for (let i = 0; i < snake.length; i++) {
-                if (nextX === snake[i].x && nextY === snake[i].y) {
-                    endGameAction();
-                    return;
-                }
+            let targetCollisionStr = headX + "_" + headY;
+            if (snakeCoordinatesString.indexOf(targetCollisionStr) !== -1) {
+                endGameAction();
+                return;
             }
 
-            // Добавление новой ячейки головы в начало
-            snake.unshift({x: nextX, y: nextY});
-
-            // Проверка поедания яблока
-            if (nextX === foodX && nextY === foodY) {
+            if (headX === foodX && headY === foodY) {
                 score += 10;
                 document.getElementById('score').innerText = "Счет: " + score;
                 generateFood();
             } else {
-                snake.pop(); // Удаляем хвост, если еду не ели
+                let segmentsList = snakeCoordinatesString.split(",");
+                segmentsList.pop();
+                snakeCoordinatesString = segmentsList.join(",");
             }
 
-            // Очищаем экран черным цветом
             ctx.fillStyle = "black";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Рисуем еду (красный квадрат)
             ctx.fillStyle = "#FF5252";
             ctx.fillRect(foodX, foodY, grid - 2, grid - 2);
 
-            // Рисуем змейку (зеленые квадраты)
+            ctx.fillStyle = "#2E7D32";
+            ctx.fillRect(headX, headY, grid - 2, grid - 2);
+
             ctx.fillStyle = "#4CAF50";
-            for (let i = 0; i < snake.length; i++) {
-                ctx.fillRect(snake[i].x, snake[i].y, grid - 2, grid - 2);
-            }
+            let activeSegments = snakeCoordinatesString.split(",");
+            activeSegments.forEach(singleSegment => {
+                if (singleSegment !== "") {
+                    let parts = singleSegment.split("_");
+                    let partX = parseInt(parts.shift(), 10);
+                    let partY = parseInt(parts.shift(), 10);
+                    ctx.fillRect(partX, partY, grid - 2, grid - 2);
+                }
+            });
         }
 
         function changeDir(direction) {
@@ -224,11 +228,13 @@
             if (direction === 'down' && dy === 0) { dx = 0; dy = grid; }
         }
 
-        function endGameAction() {
-            alert("Игра окончена! Ваш счет: " + score);
-            stopGame();
-            openScreen('mainMenu');
-        }
-    </script>
-</body>
-</html>
+        // ОТСЛЕЖИВАНИЕ НАЖАТИЙ КЛАВИАТУРЫ (Для ПК)
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') changeDir('up');
+            if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') changeDir('down');
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') changeDir('left');
+            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') changeDir('right');
+            if (e.key === 'Escape') pauseAndConfirmExit(); // Кнопка Esc для паузы});
+                function endGameAction() {alert("Игра окончена! Ваш счет: " + score);
+                stopGame();
+                openScreen('mainMenu');}
