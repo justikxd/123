@@ -4,18 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Змейка в Telegram</title>
-    <!-- Подключаем скрипт Telegram Web App -->
     <script src="https://telegram.org"></script>
     <style>
         body {
             margin: 0; background: #1a1a1a; color: white;
             display: flex; flex-direction: column; align-items: center;
             justify-content: center; height: 100vh; font-family: sans-serif;
-            overflow: hidden;
+            overflow: hidden; user-select: none;
         }
-        canvas { border: 2px solid #333; background: #000; max-width: 90vw; max-height: 70vh; }
-        .controls { display: grid; grid-template-columns: repeat(3, 60px); gap: 10px; margin-top: 15px; }
-        .btn { width: 60px; height: 60px; background: #333; border: none; color: white; font-size: 20px; border-radius: 10px; }
+        #score { font-size: 24px; margin-bottom: 10px; font-weight: bold; }
+        canvas { border: 2px solid #333; background: #000; max-width: 90vw; max-height: 50vh; border-radius: 10px; }
+        .controls { display: grid; grid-template-columns: repeat(3, 70px); gap: 10px; margin-top: 25px; }
+        .btn { width: 70px; height: 70px; background: #333; border: none; color: white; font-size: 24px; border-radius: 15px; active { background: #555; } }
         .btn-up { grid-column: 2; }
         .btn-left { grid-column: 1; }
         .btn-right { grid-column: 3; }
@@ -26,7 +26,6 @@
     <div id="score">Счет: 0</div>
     <canvas id="gameCanvas" width="400" height="400"></canvas>
     
-    <!-- Кнопки управления для мобильных устройств -->
     <div class="controls">
         <button class="btn btn-up" onclick="changeDir('up')">▲</button>
         <button class="btn btn-left" onclick="changeDir('left')">◀</button>
@@ -35,17 +34,17 @@
     </div>
 
     <script>
-        // Инициализация Telegram Web App
         const tg = window.Telegram.WebApp;
         tg.ready();
-        tg.expand(); // Разворачиваем на весь экран
+        tg.expand();
 
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         const grid = 20;
         let score = 0;
+        let gameInterval;
 
-        let snake = [{x: 160, y: 160}, {x: 140, y: 160}];
+        let snake = [{x: 160, y: 160}, {x: 140, y: 160}, {x: 120, y: 160}];
         let dx = grid, dy = 0;
         let food = {x: 300, y: 200};
 
@@ -53,14 +52,12 @@
             if (hasGameEnded()) {
                 alert("Игра окончена! Ваш счет: " + score);
                 resetGame();
+                return;
             }
-            setTimeout(function onTick() {
-                clearCanvas();
-                drawFood();
-                moveSnake();
-                drawSnake();
-                main();
-            }, 150);
+            clearCanvas();
+            drawFood();
+            moveSnake();
+            drawSnake();
         }
 
         function clearCanvas() { ctx.fillStyle = "black"; ctx.fillRect(0, 0, canvas.width, canvas.height); }
@@ -90,13 +87,21 @@
         }
 
         function hasGameEnded() {
-            for (let i = 4; i < snake.length; i++) { if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) return true; }
+            for (let i = 4; i < snake.length; i++) { 
+                if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) return true; 
+            }
             return snake[0].x < 0 || snake[0].x >= canvas.width || snake[0].y < 0 || snake[0].y >= canvas.height;
         }
 
-        function resetGame() { snake = [{x: 160, y: 160}]; dx = grid; dy = 0; score = 0; generateFood(); }
+        function resetGame() { 
+            snake = [{x: 160, y: 160}, {x: 140, y: 160}, {x: 120, y: 160}]; 
+            dx = grid; dy = 0; score = 0; 
+            document.getElementById('score').innerText = "Счет: " + score;
+            generateFood(); 
+        }
 
-        main();
+        generateFood();
+        gameInterval = setInterval(main, 150);
     </script>
 </body>
 </html>
