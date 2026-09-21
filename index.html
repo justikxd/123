@@ -140,7 +140,7 @@ h1 { font-size: 42px; margin-bottom: 30px; color: #00FF00; text-shadow: 0 0 10px
     var score = 0;
     var gameLoop = null;
     
-    // ИСПРАВЛЕНО: Правильный цикл генерации сетки из 400 ячеек
+    // Создаем сетку игрового поля
     var boardHtml = "";
     for (var cellId = 0; cellId < 400; cellId++) {
         boardHtml += "<div class='cell' id='c" + cellId + "'></div>";
@@ -261,7 +261,7 @@ h1 { font-size: 42px; margin-bottom: 30px; color: #00FF00; text-shadow: 0 0 10px
         if (direction === 'left' && dx === 0) { dx = -1; dy = 0; }
         if (direction === 'up' && dy === 0) { dx = 0; dy = -1; }
         if (direction === 'right' && dx === 0) { dx = 1; dy = 0; }
-        if (direction === 'down' && dy === 0) { dx = 0; i = 1; dy = 1; }
+        if (direction === 'down' && dy === 0) { dx = 0; dy = 1; } // ИСПРАВЛЕНО
     }
 
     document.addEventListener('keydown', function(e) {
@@ -272,7 +272,6 @@ h1 { font-size: 42px; margin-bottom: 30px; color: #00FF00; text-shadow: 0 0 10px
         if (e.key === 'Escape') { pauseAndConfirmExit(); }
     });
 
-    // Память истории игр
     function saveMatchToHistory(finalScore) {
         var existingHistory = localStorage.getItem('snake_history');
         var historyArray = existingHistory ? existingHistory.split(',') : [];
