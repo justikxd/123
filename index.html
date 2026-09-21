@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Snake Ultimate Grid</title>
+<title>Snake App Final</title>
 <script src="https://telegram.org"></script>
 <style>
 :root {
@@ -50,6 +50,7 @@ h2 { font-size: 24px; margin-bottom: 15px; color: #fff; }
 #gameBoard {
     display: grid; width: 320px; height: 320px; background: #000000;
     border: 2px solid var(--panel-border); border-radius: 14px; box-shadow: 0 15px 35px var(--shadow-color);
+    overflow: hidden;
 }
 .cell { background: #000; border: 1px solid #111; display: flex; align-items: center; justify-content: center; }
 
@@ -72,7 +73,6 @@ h2 { font-size: 24px; margin-bottom: 15px; color: #fff; }
     <div class="widget" id="topBalance">🪙 0</div>
 </div>
 
-<!-- ГЛАВНОЕ МЕНЮ -->
 <div id="mainMenu" class="screen">
     <h1>ЗМЕЙКА PLUS</h1>
     <button class="menu-btn btn-main" onclick="openScreen('gameScreen'); startGame();">Играть</button>
@@ -81,7 +81,6 @@ h2 { font-size: 24px; margin-bottom: 15px; color: #fff; }
     <button class="menu-btn" onclick="openScreen('historyScreen'); showHistory();">История игр</button>
 </div>
 
-<!-- ЭКРАН ИГРЫ -->
 <div id="gameScreen" class="screen hidden">
     <div class="game-header">
         <div id="score">🍏 0</div>
@@ -97,7 +96,6 @@ h2 { font-size: 24px; margin-bottom: 15px; color: #fff; }
     </div>
 </div>
 
-<!-- НАСТРОЙКИ СЕТКИ (ОТ 6х6 ДО 16х16) -->
 <div id="settingsScreen" class="screen hidden">
     <div class="content-box">
         <h2>⚙️ Размер поля</h2>
@@ -116,7 +114,6 @@ h2 { font-size: 24px; margin-bottom: 15px; color: #fff; }
     </div>
 </div>
 
-<!-- МАГАЗИН СКИНОВ -->
 <div id="shopScreen" class="screen hidden">
     <div class="content-box" style="max-width:340px; width:90%;">
         <h2>🛒 Магазин скинов</h2>
@@ -174,20 +171,6 @@ h2 { font-size: 24px; margin-bottom: 15px; color: #fff; }
     }
     updateBalanceWidgets();
 
-    function buildGrid() {
-        var board = document.getElementById("gameBoard");
-        board.innerHTML = "";
-        board.style.gridTemplateColumns = "repeat(" + currentGridSize + ", 1fr)";
-        board.style.gridTemplateRows = "repeat(" + currentGridSize + ", 1fr)";
-        
-        var totalCells = currentGridSize * currentGridSize;
-        var html = "";
-        for (var i = 0; i < totalCells; i++) {
-            html += "<div class='cell' id='cell_" + i + "'></div>";
-        }
-        board.innerHTML = html;
-    }
-
     function startGame() {
         score = 0; earnedCoins = 0; dx = 1; dy = 0; headX = 3; headY = 3; isPaused = false;
         currentGridSize = parseInt(document.getElementById('gridSizeSelect').value, 10);
@@ -196,7 +179,6 @@ h2 { font-size: 24px; margin-bottom: 15px; color: #fff; }
         document.getElementById('gameCoins').innerText = "🪙 " + earnedCoins;
         document.getElementById('exitModal').className = 'modal hidden';
         
-        buildGrid();
         snakeStr = "2_3,1_3,"; 
         generateFood();
         
@@ -225,8 +207,7 @@ h2 { font-size: 24px; margin-bottom: 15px; color: #fff; }
         snakeStr = currentHeadStr + snakeStr;
 
         if (headX === foodX && headY === foodY) {
-            score = score + 1;
-            earnedCoins = earnedCoins + 2; 
+            score = score + 1; earnedCoins = earnedCoins + 2; 
             document.getElementById('score').innerText = currentFoodSkin + " " + score;
             document.getElementById('gameCoins').innerText = "🪙 " + earnedCoins;
             generateFood();
@@ -235,43 +216,37 @@ h2 { font-size: 24px; margin-bottom: 15px; color: #fff; }
             if (lastComma !== -1) { snakeStr = snakeStr.substring(0, lastComma + 1); }
         }
 
-        // ЖЕЛЕЗОБЕТОННАЯ ОЧИСТКА ВСЕХ КЛЕТОК БЕЗ ОШИБОК И UNDEFINED
-        var allCells = document.getElementsByClassName("cell");
-        for (var c = 0; c < allCells.length; c++) {
-            allCells[c].innerHTML = "";
-            allCells[c].style.background = "#000000";
-            allCells[c].style.boxShadow = "none";
-        }
-
-        var foodIndex = foodY * currentGridSize + foodX;
-        var foodCell = document.getElementById("cell_" + foodIndex);
-        if (foodCell) { foodCell.innerHTML = currentFoodSkin; foodCell.style.fontSize = "16px"; }
-
-        var headIndex = headY * currentGridSize + headX;
-        var headCell = document.getElementById("cell_" + headIndex);
-        if (headCell) { headCell.style.background = currentSnakeColor; headCell.style.boxShadow = "0 0 8px " + currentSnakeColor; }
-
-        var tempStr = snakeStr;
-        while (tempStr.indexOf(",") !== -1) {
-            var commaIndex = tempStr.indexOf(",");
-            var seg = tempStr.substring(0, commaIndex);
-            tempStr = tempStr.substring(commaIndex + 1);
-            if (seg !== "") {
-                var uIndex = seg.indexOf("_");
-                var px = parseInt(seg.substring(0, uIndex), 10);
-                var py = parseInt(seg.substring(uIndex + 1), 10);
-                var bodyIndex = py * currentGridSize + px;
-                var bodyCell = document.getElementById("cell_" + bodyIndex);
-                if (bodyCell) { bodyCell.style.background = currentSnakeColor; }
+        // МОНОЛИТНЫЙ ТЕКСТОВЫЙ БУФЕР: Генерируем поле строкой, полностью исключая undefined
+        var board = document.getElementById("gameBoard");
+        board.style.gridTemplateColumns = "repeat(" + currentGridSize + ", 1fr)";
+        board.style.gridTemplateRows = "repeat(" + currentGridSize + ", 1fr)";
+        
+        var boardHtml = "";
+        var totalCells = currentGridSize * currentGridSize;
+        
+        for (var i = 0; i < totalCells; i++) {
+            var cx = i % currentGridSize;
+            var cy = Math.floor(i / currentGridSize);
+            
+            if (cx === headX && cy === headY) {
+                boardHtml += "<div class='cell' style='background:" + currentSnakeColor + "; box-shadow:0 0 8px " + currentSnakeColor + "'></div>";
+            } else if (cx === foodX && cy === foodY) {
+                boardHtml += "<div class='cell' style='font-size:16px'>" + currentFoodSkin + "</div>";
+            } else if (snakeStr.indexOf(cx + "_" + cy + ",") !== -1) {
+                boardHtml += "<div class='cell' style='background:" + currentSnakeColor + "; opacity:0.7;'></div>";
+            } else {
+                boardHtml += "<div class='cell' style='background:#000000'></div>";
             }
         }
+        board.innerHTML = boardHtml;
     }
+
     function changeDir(direction) {
         if (isPaused) return;
         if (direction === 'left' && dx === 0) { dx = -1; dy = 0; }
         if (direction === 'up' && dy === 0) { dx = 0; dy = -1; }
         if (direction === 'right' && dx === 0) { dx = 1; dy = 0; }
-        if (direction === 'down' && dy === 0) { dx = 0; dy = 1; }
+        if (direction === 'down' && dx === 0) { dx = 0; dy = 1; }
     }
 
     document.addEventListener('keydown', function(e) {
