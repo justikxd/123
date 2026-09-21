@@ -54,7 +54,6 @@ body {
 .hidden { display: none !important; }
 h1 { font-size: 46px; margin-bottom: 35px; color: var(--accent-color); text-shadow: 0 0 15px var(--accent-color); font-weight: 800; letter-spacing: 2px; }
 
-/* УЛЬТРА-ЗАКРУГЛЕННЫЕ КНОПКИ КАПСУЛЬНОГО ТИПА (border-radius: 40px) */
 .menu-btn {
     width: 260px; padding: 16px; margin: 10px; color: var(--text-color);
     font-size: 17px; font-weight: 750; border-radius: 40px; border: 1px solid var(--glass-border);
@@ -77,7 +76,7 @@ h1 { font-size: 46px; margin-bottom: 35px; color: var(--accent-color); text-shad
 #gameScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .game-header { width: 320px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 #score { font-size: 24px; font-weight: 800; color: var(--text-color); opacity: 0.8; }
-.exit-btn { background: #ff3344; color: white; border: none; padding: 10px 22px; font-weight: 700; border-radius: 25px; cursor: pointer; box-shadow: 0 4px 15px rgba(255,51,68,0.3); transition: transform 0.1s; }
+.exit-btn { background: #ff3344; color: white; border: none; padding: 10px 22px; font-weight: 700; border-radius: 25px; cursor: pointer; box-shadow: 0 4px 15px rgba(255,51,68,0.3); transition: transform 0.1s; z-index: 30; }
 .exit-btn:active { transform: scale(0.95); }
 
 canvas { border: 2px solid var(--panel-border); background: #000000; width: 320px; height: 320px; border-radius: 16px; box-shadow: 0 15px 35px var(--shadow-color); }
@@ -154,8 +153,8 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
 
     function updateMoscowTime() {
         var now = new Date();
-        var moscow = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (3 * 3600000));
-        var h = moscow.getHours(); var m = moscow.getMinutes(); var s = moscow.getSeconds();
+        var msk = new Date(now.getTime() + (now.getTimezoneOffset() * 60000) + (3 * 3600000));
+        var h = msk.getHours(); var m = msk.getMinutes(); var s = msk.getSeconds();
         if (h < 10) h = "0" + h; if (m < 10) m = "0" + m; if (s < 10) s = "0" + s;
         document.getElementById("moscowTime").innerText = "МСК: " + h + ":" + m + ":" + s;
     }
@@ -203,9 +202,20 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
 
     function stopGame() { if (gameLoop) { clearInterval(gameLoop); gameLoop = null; } }
 
-    function pauseAndConfirmExit() { isPaused = true; document.getElementById('exitModal').className = 'modal'; }
-    function resumeGame() { isPaused = false; document.getElementById('exitModal').className = 'modal hidden'; }
-    function confirmExit() { document.getElementById('exitModal').className = 'modal hidden'; saveMatchToHistory(score); stopGame(); openScreen('mainMenu'); }
+    function pauseAndConfirmExit() { 
+        isPaused = true; 
+        document.getElementById('exitModal').className = 'modal'; 
+    }
+    function resumeGame() { 
+        isPaused = false; 
+        document.getElementById('exitModal').className = 'modal hidden'; 
+    }
+    function confirmExit() { 
+        document.getElementById('exitModal').className = 'modal hidden'; 
+        saveMatchToHistory(score); 
+        stopGame(); 
+        openScreen('mainMenu'); 
+    }
 
     function generateFood() {
         foodX = Math.floor(Math.random() * 19 + 1) * 16;
@@ -234,14 +244,21 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
         ctx.fillStyle = "#FF0033"; ctx.fillRect(foodX, foodY, 14, 14); // НЕОНОВОЕ ЯБЛОКО
         ctx.fillStyle = "#00FF00"; ctx.fillRect(headX, headY, 14, 14); // НЕОНОВАЯ ГОЛОВА
 
-        // ЖЕЛЕЗОБЕТОННЫЙ РЕНДЕРИНГ: Посимвольное чтение строки через регулярное выражение, без split и массивов
+        // КАРДИНАЛЬНО НОВЫЙ ИСПРАВЛЕННЫЙ РЕНДЕРИНГ БЕЗ РЕГУЛЯРОК И ИНДЕКСОВ
         ctx.fillStyle = "#33FF33";
-        var match;
-        var regex = /(\d+)_(\d+)/g;
-        while ((match = regex.exec(snakeStr)) !== null) {
-            var bodyX = parseInt(match[1], 10);
-            var bodyY = parseInt(match[2], 10);
-            ctx.fillRect(bodyX, bodyY, 14, 14); // НЕОНОВОЕ ТЕЛО
+        var renderStr = snakeStr + ",";
+        while (renderStr.indexOf(",") !== -1) {
+            var commaPos = renderStr.indexOf(",");
+            var singleCoord = renderStr.substring(0, commaPos);
+            renderStr = renderStr.substring(commaPos + 1);
+            if (singleCoord !== "") {
+                var linePos = singleCoord.indexOf("_");
+                var textX = singleCoord.substring(0, linePos);
+                var textY = singleCoord.substring(linePos + 1);
+                var bodyX = parseInt(textX, 10);
+                var bodyY = parseInt(textY, 10);
+                ctx.fillRect(bodyX, bodyY, 14, 14); // НЕОНОВОЕ ТЕЛО
+            }
         }
     }
 
@@ -250,7 +267,7 @@ canvas { border: 2px solid var(--panel-border); background: #000000; width: 320p
         if (direction === 'left' && dx === 0) { dx = -16; dy = 0; }
         if (direction === 'up' && dy === 0) { dx = 0; dy = -16; }
         if (direction === 'right' && dx === 0) { dx = 16; dy = 0; }
-        if (direction === 'down' && dy === 0) { dx = 0; dy = 16; }
+        if (direction === 'down' && dx === 0) { dx = 0; dy = 16; }
     }
 
     document.addEventListener('keydown', function(e) {
