@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Snake Simple Game</title>
+    <title>Snake Game PC Fix</title>
     <script src="https://telegram.org"></script>
     <style>
         body {
@@ -33,7 +33,7 @@
         
         canvas { border: 2px solid #333; background: #000; width: 320px; height: 320px; border-radius: 10px; }
         .controls { display: grid; grid-template-columns: repeat(3, 75px); gap: 12px; margin-top: 20px; }
-        .ctrl-btn { width: 75px; height: 75px; background: #252525; border: none; color: white; font-size: 26px; border-radius: 15px; }
+        .ctrl-btn { width: 75px; height: 75px; background: #252525; border: none; color: white; font-size: 26px; border-radius: 15px; cursor: pointer; }
         .ctrl-btn:active { background: #4CAF50; }
         
         .content-box { width: 85%; max-width: 320px; background: #1c1c1c; border-radius: 16px; padding: 20px; text-align: center; border: 1px solid #333; }
@@ -42,7 +42,7 @@
 </head>
 <body>
 
-    <!-- МЕНЮ -->
+    <!-- ГЛАВНОЕ МЕНЮ -->
     <div id="mainMenu" class="screen">
         <h1>ЗМЕЙКА</h1>
         <button class="menu-btn btn-main" onclick="openScreen('gameScreen'); startGame();">ИГРАТЬ</button>
@@ -65,7 +65,7 @@
         </div>
     </div>
 
-    <!-- ОКНО ПАУЗЫ -->
+    <!-- МОДАЛЬНОЕ ОКНО ПАУЗЫ -->
     <div id="exitModal" class="modal hidden">
         <div class="content-box">
             <h2>Игра на паузе ⏸</h2>
@@ -85,7 +85,7 @@
         </div>
     </div>
 
-    <!-- ИСТОРИЯ -->
+    <!-- ИСТОРИЯ ИГР -->
     <div id="historyScreen" class="screen hidden">
         <div class="content-box">
             <h2>📜 История игр</h2>
@@ -96,8 +96,10 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.ready(); 
-        tg.expand();
+        if (tg) {
+            tg.ready(); 
+            tg.expand();
+        }
 
         function openScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
@@ -112,9 +114,8 @@
         let score = 0;
         let gameLoop = null;
         
-        let snakeX = [];
-        let snakeY = [];
-        
+        // Надежное создание змейки через список объектов координат
+        let snake = [];
         let dx = grid;
         let dy = 0;
         let foodX = 0;
@@ -129,13 +130,11 @@
             document.getElementById('score').innerText = "Счет: " + score;
             document.getElementById('exitModal').classList.add('hidden');
             
-            // Задаем начальные массивы через стандартный push, чтобы избежать сбоев
-            snakeX = [];
-            snakeY = [];
-            
-            snakeX.push(80);  snakeY.push(80);
-            snakeX.push(64);  snakeY.push(80);
-            snakeX.push(48);  snakeY.push(40);
+            // Наполнение змейки через явные методы
+            snake = [];
+            snake.push({x: 80, y: 80});
+            snake.push({x: 64, y: 80});
+            snake.push({x: 48, y: 80});
             
             generateFood();
             
@@ -171,46 +170,49 @@
         function updateGame() {
             if (isPaused) return;
 
-            // Координаты первой ячейки (головы)
-            const currentHeadX = snakeX[0];
-            const currentHeadY = snakeY[0];
+            // Голова змейки — первый элемент в списке
+            const head = snake[0];
+            const nextX = head.x + dx;
+            const nextY = head.y + dy;
 
-            const nextX = currentHeadX + dx;
-            const nextY = currentHeadY + dy;
-
+            // Проверка столкновения со стенами
             if (nextX < 0 || nextX >= canvas.width || nextY < 0 || nextY >= canvas.height) {
                 endGameAction();
                 return;
             }
 
-            for (let i = 0; i < snakeX.length; i++) {
-                if (nextX === snakeX[i] && nextY === snakeY[i]) {
+            // Проверка столкновения с хвостом
+            for (let i = 0; i < snake.length; i++) {
+                if (nextX === snake[i].x && nextY === snake[i].y) {
                     endGameAction();
                     return;
                 }
             }
 
-            snakeX.unshift(nextX);
-            snakeY.unshift(nextY);
+            // Добавление новой ячейки головы в начало
+            snake.unshift({x: nextX, y: nextY});
 
+            // Проверка поедания яблока
             if (nextX === foodX && nextY === foodY) {
                 score += 10;
                 document.getElementById('score').innerText = "Счет: " + score;
                 generateFood();
             } else {
-                snakeX.pop();
-                snakeY.pop();
+                snake.pop(); // Удаляем хвост, если еду не ели
             }
 
+            // Очищаем экран черным цветом
             ctx.fillStyle = "black";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+            // Рисуем еду (красный квадрат)
             ctx.fillStyle = "#FF5252";
             ctx.fillRect(foodX, foodY, grid - 2, grid - 2);
 
+            // Рисуем змейку (зеленые квадраты)
             ctx.fillStyle = "#4CAF50";
-            for (let i = 0; i < snakeX.length; i++) {
-                ctx.fillRect(snakeX[i], snakeY[i], grid - 2, grid - 2);
+            for (let i = 0; i < snake.length; i++) {
+                ctx.fillRect(snake[i].x, snake[i].y, grid - 2, grid - 2);
             }
         }
 
