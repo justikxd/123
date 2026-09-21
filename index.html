@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Snake</title>
+<title>Snake Game</title>
 <script src="https://telegram.org"></script>
 <style>
 body {
@@ -130,9 +130,9 @@ canvas {
     let score = 0;
     let gameLoop = null;
     
-    // Создаем абсолютно плоские массивы координат для защиты от сбоев
-    let snakeBodyX = [];
-    let snakeBodyY = [];
+    // Создаем списки вообще без использования символов квадратных скобок
+    let snakeBodyX = new Array();
+    let snakeBodyY = new Array();
     
     let dx = grid;
     let dy = 0;
@@ -149,9 +149,13 @@ canvas {
         document.getElementById('score').innerText = "Счет: " + score;
         document.getElementById('exitModal').classList.add('hidden');
         
-        // Начальные три сегмента змейки (голова и хвост)
-        snakeBodyX =;
-        snakeBodyY =;
+        // Наполняем стартовое тело змейки через функцию push
+        snakeBodyX = new Array();
+        snakeBodyY = new Array();
+        
+        snakeBodyX.push(96); snakeBodyY.push(80);
+        snakeBodyX.push(80); snakeBodyY.push(80);
+        snakeBodyX.push(64); snakeBodyY.push(80);
         
         generateFood();
         
@@ -187,25 +191,25 @@ canvas {
     function updateGame() {
         if (isPaused) return;
 
-        // Рассчитываем координаты следующего шага головы
-        let nextX = snakeBodyX[0] + dx;
-        let nextY = snakeBodyY[0] + dy;
+        // Берем координаты головы (первый элемент списка) через функцию .at()
+        let nextX = snakeBodyX.at(0) + dx;
+        let nextY = snakeBodyY.at(0) + dy;
 
-        // Проверка столкновения со стенами
+        // Столкновение со стенами
         if (nextX < 0 || nextX >= canvas.width || nextY < 0 || nextY >= canvas.height) {
             endGameAction(); 
             return;
         }
 
-        // Проверка столкновения с собственным телом
+        // Столкновение с собственным телом
         for (let i = 0; i < snakeBodyX.length; i++) {
-            if (nextX === snakeBodyX[i] && nextY === snakeBodyY[i]) {
+            if (nextX === snakeBodyX.at(i) && nextY === snakeBodyY.at(i)) {
                 endGameAction(); 
                 return;
             }
         }
 
-        // Двигаем змейку: добавляем новую голову вперед
+        // Добавляем новую голову в начало списков
         snakeBodyX.unshift(nextX);
         snakeBodyY.unshift(nextY);
 
@@ -215,7 +219,7 @@ canvas {
             document.getElementById('score').innerText = "Счет: " + score;
             generateFood();
         } else {
-            // Если еду не нашли, отрезаем последний кусочек хвоста
+            // Удаляем лишний хвост
             snakeBodyX.pop();
             snakeBodyY.pop();
         }
@@ -224,18 +228,18 @@ canvas {
         ctx.fillStyle = "black"; 
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Рисуем красную еду
+        // Рисуем еду
         ctx.fillStyle = "#FF5252"; 
         ctx.fillRect(foodX, foodY, grid - 2, grid - 2);
 
-        // Рисуем всю змейку целиком (голова темнее, хвост светлее)
+        // Рисуем змейку через функцию перебора .at()
         for (let i = 0; i < snakeBodyX.length; i++) {
             if (i === 0) {
                 ctx.fillStyle = "#2E7D32"; // Голова
             } else {
-                ctx.fillStyle = "#4CAF50"; // Хвост
+                ctx.fillStyle = "#4CAF50"; // Тело
             }
-            ctx.fillRect(snakeBodyX[i], snakeBodyY[i], grid - 2, grid - 2);
+            ctx.fillRect(snakeBodyX.at(i), snakeBodyY.at(i), grid - 2, grid - 2);
         }
     }
 
