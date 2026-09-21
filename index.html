@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Snake Game</title>
+<title>Snake Game Official</title>
 <script src="https://telegram.org"></script>
 <style>
 body {
@@ -39,6 +39,7 @@ h1 { font-size: 42px; margin-bottom: 30px; color: #4CAF50; }
     background: #FF5252; color: white; border: none;
     padding: 8px 16px; font-weight: bold; border-radius: 8px; cursor: pointer; z-index: 20;
 }
+.exit-btn:active { background: #d32f2f; }
 canvas {
     border: 2px solid #333; background: #000;
     width: 320px; height: 320px; border-radius: 10px;
@@ -58,6 +59,12 @@ canvas {
     background: rgba(0,0,0,0.8); z-index: 100; display: flex;
     align-items: center; justify-content: center;
 }
+#historyList {
+    max-height: 150px; overflow-y: auto; margin-top: 10px; padding: 5px;
+}
+.history-item {
+    background: #2b2b2b; padding: 8px; margin: 5px 0; border-radius: 6px; font-size: 16px;
+}
 </style>
 </head>
 <body>
@@ -66,7 +73,7 @@ canvas {
     <h1>ЗМЕЙКА</h1>
     <button class="menu-btn btn-main" onclick="openScreen('gameScreen'); startGame();">ИГРАТЬ</button>
     <button class="menu-btn" onclick="openScreen('achievementsScreen')">ДОСТИЖЕНИЯ</button>
-    <button class="menu-btn" onclick="openScreen('historyScreen')">ИСТОРИЯ ИГР</button>
+    <button class="menu-btn" onclick="openScreen('historyScreen'); showHistory();">ИСТОРИЯ ИГР</button>
 </div>
 
 <div id="gameScreen" class="screen hidden">
@@ -104,11 +111,10 @@ canvas {
 <div id="historyScreen" class="screen hidden">
     <div class="content-box">
         <h2>📜 История игр</h2>
-        <p>Нет сыгранных матчей</p>
-        <button class="menu-btn" style="width:100%;" onclick="openScreen('mainMenu')">Назад</button>
+        <div id="historyList">Нет сыгранных матчей</div>
+        <button class="menu-btn" style="width:100%; margin-top: 15px;" onclick="openScreen('mainMenu')">Назад</button>
     </div>
 </div>
-
 <script>
     var tg = window.Telegram.WebApp;
     if (tg) { tg.ready(); tg.expand(); }
@@ -124,7 +130,6 @@ canvas {
 
     var canvas = document.getElementById("gameCanvas");
     var ctx = canvas.getContext("2d");
-    var grid = 16; 
     
     var score = 0;
     var gameLoop = null;
@@ -167,6 +172,7 @@ canvas {
 
     function confirmExit() {
         document.getElementById('exitModal').className = 'modal hidden';
+        saveMatchToHistory(score);
         stopGame(); openScreen('mainMenu');
     }
 
@@ -238,8 +244,33 @@ canvas {
         if (e.key === 'Escape') { pauseAndConfirmExit(); }
     });
 
+    function saveMatchToHistory(finalScore) {
+        var existingHistory = localStorage.getItem('snake_history');
+        var historyArray = existingHistory ? existingHistory.split(',') : [];
+        historyArray.unshift(finalScore);
+        if (historyArray.length > 10) { historyArray.pop(); }
+        localStorage.setItem('snake_history', historyArray.join(','));
+    }
+
+    function showHistory() {
+        var container = document.getElementById('historyList');
+        var rawData = localStorage.getItem('snake_history');
+        if (!rawData) {
+            container.innerHTML = "Нет сыгранных матчей";
+            return;
+        }
+        var scores = rawData.split(',');
+        var htmlContent = "";
+        for (var i = 0; i < scores.length; i++) {
+            var matchNum = i + 1;
+            htmlContent += "<div class='history-item'>Игра #" + matchNum + " — " + scores[i] + " очков</div>";
+        }
+        container.innerHTML = htmlContent;
+    }
+
     function endGameAction() {
         alert("Игра окончена! Ваш счет: " + score);
+        saveMatchToHistory(score);
         stopGame(); openScreen('mainMenu');
     }
 </script>
