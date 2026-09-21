@@ -3,189 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Snake Game</title>
+    <title>Snake Game Phaser</title>
+    <!-- Подключаем Telegram Web App и надежную библиотеку Phaser 3 -->
     <script src="https://telegram.org"></script>
+    <script src="https://jsdelivr.net"></script>
     <style>
         body {
             margin: 0; background: #141414; color: white;
             display: flex; flex-direction: column; align-items: center;
-            justify-content: center; height: 100vh; font-family: 'Segoe UI', sans-serif;
+            justify-content: center; height: 100vh; font-family: sans-serif;
             overflow: hidden; user-select: none;
         }
         .screen {
             display: flex; flex-direction: column; align-items: center;
             justify-content: center; width: 100%; height: 100%; position: absolute; top: 0; left: 0;
-            background: #141414; z-index: 10; transition: 0.3s;
+            background: #141414; z-index: 10;
         }
         .hidden { display: none !important; }
-        h1 { font-size: 42px; margin-bottom: 30px; color: #4CAF50; text-shadow: 0 0 10px rgba(76,175,80,0.3); }
+        h1 { font-size: 42px; margin-bottom: 30px; color: #4CAF50; }
         .menu-btn {
             width: 240px; padding: 15px; margin: 10px; background: #222; border: 2px solid #333;
-            color: white; font-size: 18px; font-weight: bold; border-radius: 12px; cursor: pointer; transition: 0.2s;
+            color: white; font-size: 18px; font-weight: bold; border-radius: 12px; cursor: pointer;
         }
-        .menu-btn:active { background: #4CAF50; border-color: #4CAF50; transform: scale(0.98); }
+        .menu-btn:active { background: #4CAF50; border-color: #4CAF50; }
         .btn-main { background: #4CAF50; border-color: #4CAF50; }
-        .btn-main:active { background: #45a049; }
         
         #gameScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #score { font-size: 24px; margin-bottom: 10px; font-weight: bold; color: #aaa; }
-        canvas { border: 2px solid #333; background: #000; max-width: 90vw; max-height: 45vh; border-radius: 10px; }
+        #phaser-game { width: 360px; height: 360px; border-radius: 10px; overflow: hidden; border: 2px solid #333; }
         .controls { display: grid; grid-template-columns: repeat(3, 75px); gap: 12px; margin-top: 20px; }
         .ctrl-btn { width: 75px; height: 75px; background: #252525; border: none; color: white; font-size: 26px; border-radius: 15px; }
         .ctrl-btn:active { background: #4CAF50; }
-
-        .content-box { width: 85%; max-width: 320px; background: #1c1c1c; border-radius: 16px; padding: 20px; border: 1px solid #333; text-align: center; }
-        .content-box p { font-size: 18px; line-height: 1.6; margin: 10px 0; color: #ccc; }
+        .content-box { width: 85%; max-width: 320px; background: #1c1c1c; border-radius: 16px; padding: 20px; text-align: center; border: 1px solid #333; }
     </style>
 </head>
 <body>
 
-    <!-- ГЛАВНОЕ МЕНЮ -->
+    <!-- МЕНЮ -->
     <div id="mainMenu" class="screen">
         <h1>ЗМЕЙКА</h1>
-        <button class="menu-btn btn-main" onclick="openScreen('gameScreen'); startGame();">ИГРАТЬ</button>
+        <button class="menu-btn btn-main" onclick="openScreen('gameScreen')">ИГРАТЬ</button>
         <button class="menu-btn" onclick="openScreen('achievementsScreen')">ДОСТИЖЕНИЯ</button>
         <button class="menu-btn" onclick="openScreen('historyScreen')">ИСТОРИЯ ИГР</button>
     </div>
 
-    <!-- ЭКРАН ИГРЫ -->
+    <!-- ИГРОВОЙ ЭКРАН -->
     <div id="gameScreen" class="screen hidden">
-        <div id="score">Счет: 0</div>
-        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <div id="phaser-game"></div>
         <div class="controls">
-            <button class="ctrl-btn" style="grid-column:2;" onclick="changeDir('up')">▲</button>
-            <button class="ctrl-btn" style="grid-column:1;" onclick="changeDir('left')">◀</button>
-            <button class="ctrl-btn" style="grid-column:3;" onclick="changeDir('right')">▶</button>
-            <button class="ctrl-btn" style="grid-column:2;" onclick="changeDir('down')">▼</button>
+            <button class="ctrl-btn" style="grid-column:2;" id="btn-up">▲</button>
+            <button class="ctrl-btn" style="grid-column:1;" id="btn-left">◀</button>
+            <button class="ctrl-btn" style="grid-column:3;" id="btn-right">▶</button>
+            <button class="ctrl-btn" style="grid-column:2;" id="btn-down">▼</button>
         </div>
     </div>
 
-    <!-- ЭКРАН ДОСТИЖЕНИЙ -->
+    <!-- ДОСТИЖЕНИЯ -->
     <div id="achievementsScreen" class="screen hidden">
         <div class="content-box">
             <h2>🏆 Достижения</h2>
-            <p>🍏 <b>Первый перекус:</b> Съесть 1 яблоко</p>
-            <p>🐍 <b>Длинный хвост:</b> Набрать 100 очков</p>
-            <p>⚡ <b>Мастер маневров:</b> Набрать 300 очков</p>
-            <button class="menu-btn" style="width:100%; margin:20px 0 0 0;" onclick="openScreen('mainMenu')">Назад</button>
+            <p>🍏 Первый перекус</p>
+            <p>🐍 Длинный хвост</p>
+            <button class="menu-btn" style="width:100%;" onclick="openScreen('mainMenu')">Назад</button>
         </div>
     </div>
 
-    <!-- ЭКРАН ИСТОРИИ -->
+    <!-- ИСТОРИЯ -->
     <div id="historyScreen" class="screen hidden">
         <div class="content-box">
             <h2>📜 История игр</h2>
-            <p>Игра #1 — 0 очков</p>
-            <p>Игра #2 — 0 очков</p>
-            <p>Игра #3 — 0 очков</p>
-            <button class="menu-btn" style="width:100%; margin:20px 0 0 0;" onclick="openScreen('mainMenu')">Назад</button>
+            <p>Нет сыгранных матчей</p>
+            <button class="menu-btn" style="width:100%;" onclick="openScreen('mainMenu')">Назад</button>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
+        tg.ready(); tg.expand();
+
+        let gameInstance = None;
 
         function openScreen(screenId) {
             document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
             document.getElementById(screenId).classList.remove('hidden');
-            if (screenId !== 'gameScreen') stopGame();
+            
+            if (screenId === 'gameScreen') {
+                if (!gameInstance) {
+                    gameInstance = new Phaser.Game(config);
+                } else {
+                    gameInstance.scene.scenes[0].scene.restart();
+                }
+            } else {
+                if (gameInstance) {
+                    gameInstance.scene.scenes[0].stopGame();
+                }
+            }
         }
 
-        const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
-        const grid = 20;
-        let score = 0;
-        let gameLoop = null;
+        // НАСТРОЙКА ИГРЫ PHASER
+        const config = {
+            type: Phaser.AUTO,
+            width: 360,
+            height: 360,
+            parent: 'phaser-game',
+            backgroundColor: '#000000',
+            scene: { create: create, update: update }
+        };
 
-        let headX, headY, snake, dx, dy, food;
+        let snake, food, moveTimer, direction, newDirection, score, scoreText;
+        const GRID = 20;
 
-        function startGame() {
-            headX = 160; 
-            headY = 160;
-            dx = grid; 
-            dy = 0; 
-            score = 0;
-            document.getElementById('score').innerText = "Счет: " + score;
-            
-            // Жестко задаем начальное тело змейки без сложных массивов
+        function create() {
             snake = [];
-            snake.push({x: 160, y: 160});
-            snake.push({x: 140, y: 160});
-            snake.push({x: 120, y: 160});
-            
-            generateFood();
-            
-            if(gameLoop) clearInterval(gameLoop);
-            gameLoop = setInterval(updateGame, 150);
-        }
+            direction = 'right';
+            newDirection = 'right';
+            score = 0;
+            moveTimer = 0;
 
-        function stopGame() {
-            if(gameLoop) { clearInterval(gameLoop); gameLoop = null; }
-        }
-
-        function updateGame() {
-            headX += dx; 
-            headY += dy;
-
-            // Проигрыш при столкновении со стеной
-            if (headX < 0 || headX >= canvas.width || headY < 0 || headY >= canvas.height) {
-                alert("Игра окончена! Ваш счет: " + score);
-                stopGame();
-                openScreen('mainMenu');
-                return;
+            // Создаем стартовые кубики
+            for (let i = 0; i < 3; i++) {
+                let segment = this.add.rectangle(160 - (i * GRID), 160, GRID - 2, GRID - 2, 0x4CAF50).setOrigin(0);
+                snake.push(segment);
             }
 
-            // Проигрыш при столкновении с самим собой
-            for (let i = 1; i < snake.length; i++) {
-                if (headX === snake[i].x && headY === snake[i].y) {
-                    alert("Игра окончена! Ваш счет: " + score);
-                    stopGame();
+            // Создаем еду
+            food = this.add.rectangle(280, 160, GRID - 2, GRID - 2, 0xFF5252).setOrigin(0);
+
+            // Создаем текст счета прямо внутри Phaser холста
+            scoreText = this.add.text(10, 10, 'Счет: 0', { font: '18px Arial', fill: '#ffffff' });
+
+            // Привязка кнопок меню
+            document.getElementById('btn-up').onclick = () => { if (direction !== 'down') newDirection = 'up'; };
+            document.getElementById('btn-down').onclick = () => { if (direction !== 'up') newDirection = 'down'; };
+            document.getElementById('btn-left').onclick = () => { if (direction !== 'right') newDirection = 'left'; };
+            document.getElementById('btn-right').onclick = () => { if (direction !== 'left') newDirection = 'right'; };
+        }
+
+        function update(time, delta) {
+            moveTimer += delta;
+
+            if (moveTimer >= 150) { // Скорость змейки
+                moveTimer = 0;
+                direction = newDirection;
+
+                // Рассчитываем координаты новой головы
+                let head = snake[0];
+                let nextX = head.x;
+                let nextY = head.y;
+
+                if (direction === 'left') nextX -= GRID;
+                if (direction === 'right') nextX += GRID;
+                if (direction === 'up') nextY -= GRID;
+                if (direction === 'down') nextY += GRID;
+
+                // Проверка выхода за границы (Проигрыш)
+                if (nextX < 0 || nextX >= 360 || nextY < 0 || nextY >= 360) {
+                    alert('Игра окончена! Счет: ' + score);
                     openScreen('mainMenu');
                     return;
                 }
+
+                // Проверка столкновения с собой
+                for (let i = 1; i < snake.length; i++) {
+                    if (nextX === snake[i].x && nextY === snake[i].y) {
+                        alert('Игра окончена! Счет: ' + score);
+                        openScreen('mainMenu');
+                        return;
+                    }
+                }
+
+                // Логика поедания яблока
+                if (nextX === food.x && nextY === food.y) {
+                    score += 10;
+                    scoreText.setText('Счет: ' + score);
+                    
+                    // Переносим еду
+                    food.x = Math.floor(Math.random() * (360 / GRID)) * GRID;
+                    food.y = Math.floor(Math.random() * (360 / GRID)) * GRID;
+                    
+                    // Растим змейку (добавляем новый сегмент)
+                    let newSegment = this.add.rectangle(nextX, nextY, GRID - 2, GRID - 2, 0x4CAF50).setOrigin(0);
+                    snake.unshift(newSegment);
+                } else {
+                    // Обычное перемещение: двигаем хвост к голове
+                    let tail = snake.pop();
+                    tail.x = nextX;
+                    tail.y = nextY;
+                    snake.unshift(tail);
+                }
             }
-
-            // Добавляем новую голову
-            snake.unshift({x: headX, y: headY});
-
-            // Кушаем яблоко
-            if (headX === food.x && headY === food.y) {
-                score += 10;
-                document.getElementById('score').innerText = "Счет: " + score;
-                generateFood();
-            } else {
-                snake.pop(); // Удаляем хвост только если ничего не съели
-            }
-
-            // Отрисовка
-            ctx.fillStyle = "black"; 
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Рисуем еду
-            ctx.fillStyle = '#FF5252'; 
-            ctx.fillRect(food.x, food.y, grid-2, grid-2);
-            
-            // Рисуем всю змейку целиком
-            ctx.fillStyle = '#4CAF50'; 
-            for (let i = 0; i < snake.length; i++) {
-                ctx.fillRect(snake[i].x, snake[i].y, grid-2, grid-2);
-            }
-        }
-
-        function changeDir(direction) {
-            if (direction === 'left' && dx === 0) { dx = -grid; dy = 0; }
-            if (direction === 'up' && dy === 0) { dx = 0; dy = -grid; }
-            if (direction === 'right' && dx === 0) { dx = grid; dy = 0; }
-            if (direction === 'down' && dy === 0) { dx = 0; dy = grid; }
-        }
-
-        function generateFood() {
-            food = {
-                x: Math.floor(Math.random() * (canvas.width / grid)) * grid,
-                y: Math.floor(Math.random() * (canvas.height / grid)) * grid
-            };
         }
     </script>
 </body>
