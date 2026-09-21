@@ -18,14 +18,14 @@ body {
     top: 0; left: 0; background: #141414; z-index: 10;
 }
 .hidden { display: none !important; }
-h1 { font-size: 42px; margin-bottom: 30px; color: #4CAF50; }
+h1 { font-size: 42px; margin-bottom: 30px; color: #00FF00; text-shadow: 0 0 10px #00FF00; }
 .menu-btn {
     width: 240px; padding: 15px; margin: 10px; background: #222;
     border: 2px solid #333; color: white; font-size: 18px; font-weight: bold;
     border-radius: 12px; cursor: pointer;
 }
-.menu-btn:active { background: #4CAF50; border-color: #4CAF50; }
-.btn-main { background: #4CAF50; border-color: #4CAF50; }
+.menu-btn:active { background: #00FF00; border-color: #00FF00; color: black; }
+.btn-main { background: #00FF00; border-color: #00FF00; color: black; }
 #gameScreen {
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
@@ -36,10 +36,10 @@ h1 { font-size: 42px; margin-bottom: 30px; color: #4CAF50; }
 }
 #score { font-size: 24px; font-weight: bold; color: #aaa; }
 .exit-btn {
-    background: #FF5252; color: white; border: none;
+    background: #FF0033; color: white; border: none;
     padding: 8px 16px; font-weight: bold; border-radius: 8px; cursor: pointer; z-index: 20;
 }
-.exit-btn:active { background: #d32f2f; }
+.exit-btn:active { background: #cc0029; }
 canvas {
     border: 2px solid #333; background: #000;
     width: 320px; height: 320px; border-radius: 10px;
@@ -49,7 +49,7 @@ canvas {
     width: 75px; height: 75px; background: #252525; border: none;
     color: white; font-size: 26px; border-radius: 15px; cursor: pointer;
 }
-.ctrl-btn:active { background: #4CAF50; }
+.ctrl-btn:active { background: #00FF00; }
 .content-box {
     width: 85%; max-width: 320px; background: #1c1c1c;
     border-radius: 16px; padding: 20px; text-align: center; border: 1px solid #333;
@@ -95,7 +95,7 @@ canvas {
         <h2>Игра на паузе ⏸</h2>
         <p>Вы уверены, что хотите выйти? Прогресс будет потерян.</p>
         <button class="menu-btn btn-main" onclick="resumeGame()">Продолжить</button>
-        <button class="menu-btn" style="background:#FF5252; border-color:#FF5252;" onclick="confirmExit()">Да, выйти</button>
+        <button class="menu-btn" style="background:#FF0033; border-color:#FF0033; color: white;" onclick="confirmExit()">Да, выйти</button>
     </div>
 </div>
 
@@ -177,8 +177,8 @@ canvas {
     }
 
     function generateFood() {
-        foodX = Math.floor(Math.random() * 20) * 16;
-        foodY = Math.floor(Math.random() * 20) * 16;
+        foodX = Math.floor(Math.random() * 19 + 1) * 16;
+        foodY = Math.floor(Math.random() * 19 + 1) * 16;
     }
 
     function updateGame() {
@@ -212,18 +212,24 @@ canvas {
             }
         }
 
-        ctx.fillStyle = "black"; ctx.fillRect(0, 0, 320, 320);
-        ctx.fillStyle = "#FF5252"; ctx.fillRect(foodX, foodY, 14, 14);
-        ctx.fillStyle = "#2E7D32"; ctx.fillRect(headX, headY, 14, 14);
+        // Очищаем экран глубоким черным
+        ctx.fillStyle = "#000000"; ctx.fillRect(0, 0, 320, 320);
+        
+        // Рисуем ЯРКО-КРАСНУЮ (НЕОНОВУЮ) еду
+        ctx.fillStyle = "#FF0033"; ctx.fillRect(foodX, foodY, 14, 14);
+        
+        // Рисуем ЯРКО-ЗЕЛЕНУЮ голову змейки
+        ctx.fillStyle = "#00FF00"; ctx.fillRect(headX, headY, 14, 14);
 
-        ctx.fillStyle = "#4CAF50";
+        // Рисуем тело змейки ярко-зеленым цветом
+        ctx.fillStyle = "#33FF33";
         var segments = snakeStr.split(",");
         for (var i = 0; i < segments.length; i++) {
             if (segments[i] !== "") {
                 var coords = segments[i].split("_");
-                var xX = parseInt(coords.shift(), 10); // Жестко берем первое значение X
-                var yY = parseInt(coords.pop(), 10);   // Жестко берем последнее значение Y
-                ctx.fillRect(xX, yY, 14, 14);
+                var partX = parseInt(coords[0], 10); // Безопасное чтение X по индексу
+                var partY = parseInt(coords[1], 10); // Безопасное чтение Y по индексу
+                ctx.fillRect(partX, partY, 14, 14);
             }
         }
     }
