@@ -1,240 +1,236 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Snake Game Fixed Official</title>
-    <script src="https://telegram.org"></script>
-    <style>
-        body {
-            margin: 0; background: #141414; color: white;
-            display: flex; flex-direction: column; align-items: center;
-            justify-content: center; height: 100vh; font-family: sans-serif;
-            overflow: hidden; user-select: none;
-        }
-        .screen {
-            display: flex; flex-direction: column; align-items: center;
-            justify-content: center; width: 100%; height: 100%; position: absolute; top: 0; left: 0;
-            background: #141414; z-index: 10;
-        }
-        .hidden { display: none !important; }
-        h1 { font-size: 42px; margin-bottom: 30px; color: #4CAF50; }
-        .menu-btn {
-            width: 240px; padding: 15px; margin: 10px; background: #222; border: 2px solid #333;
-            color: white; font-size: 18px; font-weight: bold; border-radius: 12px; cursor: pointer;
-        }
-        .menu-btn:active { background: #4CAF50; border-color: #4CAF50; }
-        .btn-main { background: #4CAF50; border-color: #4CAF50; }
-        
-        #gameScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .game-header { width: 320px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        #score { font-size: 24px; font-weight: bold; color: #aaa; }
-        .exit-btn { background: #FF5252; color: white; border: none; padding: 8px 16px; font-weight: bold; border-radius: 8px; cursor: pointer; }
-        .exit-btn:active { background: #d32f2f; }
-        
-        canvas { border: 2px solid #333; background: #000; width: 320px; height: 320px; border-radius: 10px; }
-        .controls { display: grid; grid-template-columns: repeat(3, 75px); gap: 12px; margin-top: 20px; }
-        .ctrl-btn { width: 75px; height: 75px; background: #252525; border: none; color: white; font-size: 26px; border-radius: 15px; cursor: pointer; }
-        .ctrl-btn:active { background: #4CAF50; }
-        
-        .content-box { width: 85%; max-width: 320px; background: #1c1c1c; border-radius: 16px; padding: 20px; text-align: center; border: 1px solid #333; }
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; display: flex; align-items: center; justify-content: center; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Snake</title>
+<script src="https://telegram.org"></script>
+<style>
+body {
+    margin: 0; background: #141414; color: white;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; height: 100vh; font-family: sans-serif;
+    overflow: hidden; user-select: none;
+}
+.screen {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; width: 100%; height: 100%; position: absolute;
+    top: 0; left: 0; background: #141414; z-index: 10;
+}
+.hidden { display: none !important; }
+h1 { font-size: 42px; margin-bottom: 30px; color: #4CAF50; }
+.menu-btn {
+    width: 240px; padding: 15px; margin: 10px; background: #222;
+    border: 2px solid #333; color: white; font-size: 18px; font-weight: bold;
+    border-radius: 12px; cursor: pointer;
+}
+.menu-btn:active { background: #4CAF50; border-color: #4CAF50; }
+.btn-main { background: #4CAF50; border-color: #4CAF50; }
+#gameScreen {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+}
+.game-header {
+    width: 320px; display: flex; justify-content: space-between;
+    align-items: center; margin-bottom: 10px;
+}
+#score { font-size: 24px; font-weight: bold; color: #aaa; }
+.exit-btn {
+    background: #FF5252; color: white; border: none;
+    padding: 8px 16px; font-weight: bold; border-radius: 8px; cursor: pointer;
+}
+canvas {
+    border: 2px solid #333; background: #000;
+    width: 320px; height: 320px; border-radius: 10px;
+}
+.controls { display: grid; grid-template-columns: repeat(3, 75px); gap: 12px; margin-top: 20px; }
+.ctrl-btn {
+    width: 75px; height: 75px; background: #252525; border: none;
+    color: white; font-size: 26px; border-radius: 15px; cursor: pointer;
+}
+.ctrl-btn:active { background: #4CAF50; }
+.content-box {
+    width: 85%; max-width: 320px; background: #1c1c1c;
+    border-radius: 16px; padding: 20px; text-align: center; border: 1px solid #333;
+}
+.modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8); z-index: 100; display: flex;
+    align-items: center; justify-content: center;
+}
+</style>
 </head>
 <body>
 
-    <!-- ГЛАВНОЕ МЕНЮ -->
-    <div id="mainMenu" class="screen">
-        <h1>ЗМЕЙКА</h1>
-        <button class="menu-btn btn-main" onclick="openScreen('gameScreen'); startGame();">ИГРАТЬ</button>
-        <button class="menu-btn" onclick="openScreen('achievementsScreen')">ДОСТИЖЕНИЯ</button>
-        <button class="menu-btn" onclick="openScreen('historyScreen')">ИСТОРИЯ ИГР</button>
+<div id="mainMenu" class="screen">
+    <h1>ЗМЕЙКА</h1>
+    <button class="menu-btn btn-main" onclick="openScreen('gameScreen'); startGame();">ИГРАТЬ</button>
+    <button class="menu-btn" onclick="openScreen('achievementsScreen')">ДОСТИЖЕНИЯ</button>
+    <button class="menu-btn" onclick="openScreen('historyScreen')">ИСТОРИЯ ИГР</button>
+</div>
+
+<div id="gameScreen" class="screen hidden">
+    <div class="game-header">
+        <div id="score">Счет: 0</div>
+        <button class="exit-btn" onclick="pauseAndConfirmExit()">Выход</button>
     </div>
-
-    <!-- ИГРОВОЙ ЭКРАН -->
-    <div id="gameScreen" class="screen hidden">
-        <div class="game-header">
-            <div id="score">Счет: 0</div>
-            <button class="exit-btn" onclick="pauseAndConfirmExit()">Выход</button>
-        </div>
-        <canvas id="gameCanvas" width="320" height="320"></canvas>
-        <div class="controls">
-            <button class="ctrl-btn" style="grid-column:2;" onclick="changeDir('up')">▲</button>
-            <button class="ctrl-btn" style="grid-column:1;" onclick="changeDir('left')">◀</button>
-            <button class="ctrl-btn" style="grid-column:3;" onclick="changeDir('right')">▶</button>
-            <button class="ctrl-btn" style="grid-column:2;" onclick="changeDir('down')">▼</button>
-        </div>
+    <canvas id="gameCanvas" width="320" height="320"></canvas>
+    <div class="controls">
+        <button class="ctrl-btn" style="grid-column:2;" onclick="changeDir('up')">▲</button>
+        <button class="ctrl-btn" style="grid-column:1;" onclick="changeDir('left')">◀</button>
+        <button class="ctrl-btn" style="grid-column:3;" onclick="changeDir('right')">▶</button>
+        <button class="ctrl-btn" style="grid-column:2;" onclick="changeDir('down')">▼</button>
     </div>
+</div>
 
-    <!-- МОДАЛЬНОЕ ОКНО ПАУЗЫ -->
-    <div id="exitModal" class="modal hidden">
-        <div class="content-box">
-            <h2>Игра на паузе ⏸</h2>
-            <p>Вы уверены, что хотите выйти? Прогресс будет потерян.</p>
-            <button class="menu-btn btn-main" onclick="resumeGame()">Продолжить</button>
-            <button class="menu-btn" style="background:#FF5252; border-color:#FF5252;" onclick="confirmExit()">Да, выйти</button>
-        </div>
+<div id="exitModal" class="modal hidden">
+    <div class="content-box">
+        <h2>Игра на паузе ⏸</h2>
+        <p>Вы уверены, что хотите выйти? Прогресс будет потерян.</p>
+        <button class="menu-btn btn-main" onclick="resumeGame()">Продолжить</button>
+        <button class="menu-btn" style="background:#FF5252; border-color:#FF5252;" onclick="confirmExit()">Да, выйти</button>
     </div>
+</div>
 
-    <!-- ДОСТИЖЕНИЯ -->
-    <div id="achievementsScreen" class="screen hidden">
-        <div class="content-box">
-            <h2>🏆 Достижения</h2>
-            <p>🍏 Первый перекус</p>
-            <p>🐍 Длинный хвост</p>
-            <button class="menu-btn" style="width:100%;" onclick="openScreen('mainMenu')">Назад</button>
-        </div>
+<div id="achievementsScreen" class="screen hidden">
+    <div class="content-box">
+        <h2>🏆 Достижения</h2>
+        <p>🍏 Первый перекус</p>
+        <p>🐍 Длинный хвост</p>
+        <button class="menu-btn" style="width:100%;" onclick="openScreen('mainMenu')">Назад</button>
     </div>
+</div>
 
-    <!-- ИСТОРИЯ ИГР -->
-    <div id="historyScreen" class="screen hidden">
-        <div class="content-box">
-            <h2>📜 История игр</h2>
-            <p>Нет сыгранных матчей</p>
-            <button class="menu-btn" style="width:100%;" onclick="openScreen('mainMenu')">Назад</button>
-        </div>
+<div id="historyScreen" class="screen hidden">
+    <div class="content-box">
+        <h2>📜 История игр</h2>
+        <p>Нет сыгранных матчей</p>
+        <button class="menu-btn" style="width:100%;" onclick="openScreen('mainMenu')">Назад</button>
     </div>
+</div>
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        if (tg) { tg.ready(); tg.expand(); }
+<script>
+    const tg = window.Telegram.WebApp;
+    if (tg) { tg.ready(); tg.expand(); }
 
-        function openScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-            document.getElementById(screenId).classList.remove('hidden');
-            if (screenId !== 'gameScreen') stopGame();
+    function openScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(function(s) { 
+            s.classList.add('hidden'); 
+        });
+        document.getElementById(screenId).classList.remove('hidden');
+        if (screenId !== 'gameScreen') { stopGame(); }
+    }
+
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const grid = 16; 
+    
+    let score = 0;
+    let gameLoop = null;
+    
+    let snakeCoordinatesString = "";
+    let headX = 96;
+    let headY = 80;
+    
+    let dx = grid;
+    let dy = 0;
+    let foodX = 0;
+    let foodY = 0;
+    let isPaused = false;
+
+    function startGame() {
+        score = 0; dx = grid; dy = 0; headX = 96; headY = 80; isPaused = false;
+        document.getElementById('score').innerText = "Счет: " + score;
+        document.getElementById('exitModal').classList.add('hidden');
+        snakeCoordinatesString = "80_80,64_80";
+        generateFood();
+        if (gameLoop) { clearInterval(gameLoop); }
+        gameLoop = setInterval(updateGame, 160); 
+    }
+
+    function stopGame() {
+        if (gameLoop) { clearInterval(gameLoop); gameLoop = null; }
+    }
+
+    function pauseAndConfirmExit() {
+        isPaused = true;
+        document.getElementById('exitModal').classList.remove('hidden');
+    }
+
+    function resumeGame() {
+        isPaused = false; 
+        document.getElementById('exitModal').classList.add('hidden');
+    }
+
+    function confirmExit() {
+        document.getElementById('exitModal').classList.add('hidden');
+        stopGame(); openScreen('mainMenu');
+    }
+
+    function generateFood() {
+        foodX = Math.floor(Math.random() * (canvas.width / grid)) * grid;
+        foodY = Math.floor(Math.random() * (canvas.height / grid)) * grid;
+    }
+
+    function updateGame() {
+        if (isPaused) return;
+        let oldHeadStr = headX + "_" + headY;
+        if (snakeCoordinatesString !== "") {
+            snakeCoordinatesString = oldHeadStr + "," + snakeCoordinatesString;
+        } else {
+            snakeCoordinatesString = oldHeadStr;
         }
-
-        const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
-        const grid = 16; 
-        
-        let score = 0;
-        let gameLoop = null;
-        
-        let snakeCoordinatesString = "";
-        let headX = 96;
-        let headY = 80;
-        
-        let dx = grid;
-        let dy = 0;
-        let foodX = 0;
-        let foodY = 0;
-        let isPaused = false;
-
-        function startGame() {
-            score = 0;
-            dx = grid;
-            dy = 0;
-            headX = 96;
-            headY = 80;
-            isPaused = false;
+        headX = headX + dx; headY = headY + dy;
+        if (headX < 0 || headX >= canvas.width || headY < 0 || headY >= canvas.height) {
+            endGameAction(); return;
+        }
+        let targetCollisionStr = headX + "_" + headY;
+        if (snakeCoordinatesString.indexOf(targetCollisionStr) !== -1) {
+            endGameAction(); return;
+        }
+        if (headX === foodX && headY === foodY) {
+            score += 10;
             document.getElementById('score').innerText = "Счет: " + score;
-            document.getElementById('exitModal').classList.add('hidden');
-            
-            snakeCoordinatesString = "80_80,64_80";
-            
             generateFood();
-            
-            if (gameLoop) clearInterval(gameLoop);
-            gameLoop = setInterval(updateGame, 160); 
+        } else {
+            let segmentsList = snakeCoordinatesString.split(",");
+            segmentsList.pop(); snakeCoordinatesString = segmentsList.join(",");
         }
-
-        function stopGame() {
-            if (gameLoop) { clearInterval(gameLoop); gameLoop = null; }
-        }
-
-        function pauseAndConfirmExit() {
-            isPaused = true;
-            document.getElementById('exitModal').classList.remove('hidden');
-        }
-
-        function resumeGame() {
-            isPaused = false; 
-            document.getElementById('exitModal').classList.add('hidden');
-        }
-
-        function confirmExit() {
-            document.getElementById('exitModal').classList.add('hidden');
-            stopGame();
-            openScreen('mainMenu');
-        }
-
-        function generateFood() {
-            foodX = Math.floor(Math.random() * (canvas.width / grid)) * grid;
-            foodY = Math.floor(Math.random() * (canvas.height / grid)) * grid;
-        }
-
-        function updateGame() {
-            if (isPaused) return;
-
-            let oldHeadStr = headX + "_" + headY;
-            if (snakeCoordinatesString !== "") {
-                snakeCoordinatesString = oldHeadStr + "," + snakeCoordinatesString;
-            } else {
-                snakeCoordinatesString = oldHeadStr;
+        ctx.fillStyle = "black"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#FF5252"; ctx.fillRect(foodX, foodY, grid - 2, grid - 2);
+        ctx.fillStyle = "#2E7D32"; ctx.fillRect(headX, headY, grid - 2, grid - 2);
+        ctx.fillStyle = "#4CAF50";
+        let activeSegments = snakeCoordinatesString.split(",");
+        activeSegments.forEach(function(singleSegment) {
+            if (singleSegment !== "") {
+                let parts = singleSegment.split("_");
+                let partX = parseInt(parts.shift(), 10);
+                let partY = parseInt(parts.shift(), 10);
+                ctx.fillRect(partX, partY, grid - 2, grid - 2);
             }
+        });
+    }
 
-            headX = headX + dx;
-            headY = headY + dy;
+    function changeDir(direction) {
+        if (isPaused) return;
+        if (direction === 'left' && dx === 0) { dx = -grid; dy = 0; }
+        if (direction === 'up' && dy === 0) { dx = 0; dy = -grid; }
+        if (direction === 'right' && dx === 0) { dx = grid; dy = 0; }
+        if (direction === 'down' && dy === 0) { dx = 0; dy = grid; }
+    }
 
-            if (headX < 0 || headX >= canvas.width || headY < 0 || headY >= canvas.height) {
-                endGameAction();
-                return;
-            }
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') { changeDir('up'); }
+        if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') { changeDir('down'); }
+        if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { changeDir('left'); }
+        if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { changeDir('right'); }
+        if (e.key === 'Escape') { pauseAndConfirmExit(); }
+    });
 
-            let targetCollisionStr = headX + "_" + headY;
-            if (snakeCoordinatesString.indexOf(targetCollisionStr) !== -1) {
-                endGameAction();
-                return;
-            }
-
-            if (headX === foodX && headY === foodY) {
-                score += 10;
-                document.getElementById('score').innerText = "Счет: " + score;
-                generateFood();
-            } else {
-                let segmentsList = snakeCoordinatesString.split(",");
-                segmentsList.pop();
-                snakeCoordinatesString = segmentsList.join(",");
-            }
-
-            ctx.fillStyle = "black";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.fillStyle = "#FF5252";
-            ctx.fillRect(foodX, foodY, grid - 2, grid - 2);
-
-            ctx.fillStyle = "#2E7D32";
-            ctx.fillRect(headX, headY, grid - 2, grid - 2);
-
-            ctx.fillStyle = "#4CAF50";
-            let activeSegments = snakeCoordinatesString.split(",");
-            activeSegments.forEach(singleSegment => {
-                if (singleSegment !== "") {
-                    let parts = singleSegment.split("_");
-                    let partX = parseInt(parts.shift(), 10);
-                    let partY = parseInt(parts.shift(), 10);
-                    ctx.fillRect(partX, partY, grid - 2, grid - 2);
-                }
-            });
-        }
-
-        function changeDir(direction) {
-            if (isPaused) return;
-            if (direction === 'left' && dx === 0) { dx = -grid; dy = 0; }
-            if (direction === 'up' && dy === 0) { dx = 0; dy = -grid; }
-            if (direction === 'right' && dx === 0) { dx = grid; dy = 0; }
-            if (direction === 'down' && dy === 0) { dx = 0; dy = grid; }
-        }
-
-        // ОТСЛЕЖИВАНИЕ НАЖАТИЙ КЛАВИАТУРЫ (Для ПК)
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') changeDir('up');
-            if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') changeDir('down');
-            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') changeDir('left');
-            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') changeDir('right');
-            if (e.key === 'Escape') pauseAndConfirmExit(); // Кнопка Esc для паузы});
-                function endGameAction() {alert("Игра окончена! Ваш счет: " + score);
-                stopGame();
-                openScreen('mainMenu');}
+    function endGameAction() {
+        alert("Игра окончена! Ваш счет: " + score);
+        stopGame(); openScreen('mainMenu');
+    }
+</script>
+</body>
+</html>
