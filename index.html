@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Snake Game</title>
+    <title>Snake Simple Game</title>
     <script src="https://telegram.org"></script>
     <style>
         body {
@@ -30,7 +30,6 @@
         .game-header { width: 320px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         #score { font-size: 24px; font-weight: bold; color: #aaa; }
         .exit-btn { background: #FF5252; color: white; border: none; padding: 8px 16px; font-weight: bold; border-radius: 8px; cursor: pointer; }
-        .exit-btn:active { background: #d32f2f; }
         
         canvas { border: 2px solid #333; background: #000; width: 320px; height: 320px; border-radius: 10px; }
         .controls { display: grid; grid-template-columns: repeat(3, 75px); gap: 12px; margin-top: 20px; }
@@ -38,8 +37,6 @@
         .ctrl-btn:active { background: #4CAF50; }
         
         .content-box { width: 85%; max-width: 320px; background: #1c1c1c; border-radius: 16px; padding: 20px; text-align: center; border: 1px solid #333; }
-        
-        /* Модальное окно паузы/подтверждения */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; display: flex; align-items: center; justify-content: center; }
     </style>
 </head>
@@ -68,11 +65,11 @@
         </div>
     </div>
 
-    <!-- ОКНО ПОДТВЕРЖДЕНИЯ ВЫХОДА (ПАУЗА) -->
+    <!-- ОКНО ПАУЗЫ -->
     <div id="exitModal" class="modal hidden">
         <div class="content-box">
             <h2>Игра на паузе ⏸</h2>
-            <p>Вы уверены, что хотите выйти в меню? Текущий прогресс будет потерян.</p>
+            <p>Вы уверены, что хотите выйти? Прогресс будет потерян.</p>
             <button class="menu-btn btn-main" onclick="resumeGame()">Продолжить</button>
             <button class="menu-btn" style="background:#FF5252; border-color:#FF5252;" onclick="confirmExit()">Да, выйти</button>
         </div>
@@ -114,7 +111,10 @@
         
         let score = 0;
         let gameLoop = null;
-        let snake = [];
+        
+        let snakeX = [];
+        let snakeY = [];
+        
         let dx = grid;
         let dy = 0;
         let foodX = 0;
@@ -129,11 +129,13 @@
             document.getElementById('score').innerText = "Счет: " + score;
             document.getElementById('exitModal').classList.add('hidden');
             
-            snake = [
-                {x: 80, y: 80},
-                {x: 64, y: 80},
-                {x: 48, y: 80}
-            ];
+            // Задаем начальные массивы через стандартный push, чтобы избежать сбоев
+            snakeX = [];
+            snakeY = [];
+            
+            snakeX.push(80);  snakeY.push(80);
+            snakeX.push(64);  snakeY.push(80);
+            snakeX.push(48);  snakeY.push(40);
             
             generateFood();
             
@@ -142,25 +144,19 @@
         }
 
         function stopGame() {
-            if (gameLoop) {
-                clearInterval(gameLoop);
-                gameLoop = null;
-            }
+            if (gameLoop) { clearInterval(gameLoop); gameLoop = null; }
         }
 
-        // Логика паузы и вызова окна подтверждения
         function pauseAndConfirmExit() {
-            isPaused = true; // Блокируем обновление кадров игры
+            isPaused = true;
             document.getElementById('exitModal').classList.remove('hidden');
         }
 
-        // Возврат в игру
         function resumeGame() {
             isPaused = false; 
             document.getElementById('exitModal').classList.add('hidden');
         }
 
-        // Подтверждение выхода в главное меню
         function confirmExit() {
             document.getElementById('exitModal').classList.add('hidden');
             stopGame();
@@ -173,31 +169,37 @@
         }
 
         function updateGame() {
-            if (isPaused) return; // Если пауза — ничего не делаем
+            if (isPaused) return;
 
-            const headX = snake[0].x + dx;
-            const headY = snake[0].y + dy;
+            // Координаты первой ячейки (головы)
+            const currentHeadX = snakeX[0];
+            const currentHeadY = snakeY[0];
 
-            if (headX < 0 || headX >= canvas.width || headY < 0 || headY >= canvas.height) {
+            const nextX = currentHeadX + dx;
+            const nextY = currentHeadY + dy;
+
+            if (nextX < 0 || nextX >= canvas.width || nextY < 0 || nextY >= canvas.height) {
                 endGameAction();
                 return;
             }
 
-            for (let i = 0; i < snake.length; i++) {
-                if (headX === snake[i].x && headY === snake[i].y) {
+            for (let i = 0; i < snakeX.length; i++) {
+                if (nextX === snakeX[i] && nextY === snakeY[i]) {
                     endGameAction();
                     return;
                 }
             }
 
-            snake.unshift({x: headX, y: headY});
+            snakeX.unshift(nextX);
+            snakeY.unshift(nextY);
 
-            if (headX === foodX && headY === foodY) {
+            if (nextX === foodX && nextY === foodY) {
                 score += 10;
                 document.getElementById('score').innerText = "Счет: " + score;
                 generateFood();
             } else {
-                snake.pop();
+                snakeX.pop();
+                snakeY.pop();
             }
 
             ctx.fillStyle = "black";
@@ -207,13 +209,13 @@
             ctx.fillRect(foodX, foodY, grid - 2, grid - 2);
 
             ctx.fillStyle = "#4CAF50";
-            for (let i = 0; i < snake.length; i++) {
-                ctx.fillRect(snake[i].x, snake[i].y, grid - 2, grid - 2);
+            for (let i = 0; i < snakeX.length; i++) {
+                ctx.fillRect(snakeX[i], snakeY[i], grid - 2, grid - 2);
             }
         }
 
         function changeDir(direction) {
-            if (isPaused) return; // Запрещаем менять направление на паузе
+            if (isPaused) return;
             if (direction === 'left' && dx === 0) { dx = -grid; dy = 0; }
             if (direction === 'up' && dy === 0) { dx = 0; dy = -grid; }
             if (direction === 'right' && dx === 0) { dx = grid; dy = 0; }
