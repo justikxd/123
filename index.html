@@ -235,11 +235,12 @@ h2 { font-size: 24px; margin-bottom: 15px; color: #fff; }
             if (lastComma !== -1) { snakeStr = snakeStr.substring(0, lastComma + 1); }
         }
 
-        // ИСПРАВЛЕНО: Полностью чистый рабочий цикл очистки клеток
-        var cellsCount = currentGridSize * currentGridSize;
-        for (var c = 0; c < cellsCount; c++) {
-            var el = document.getElementById("cell_" + c);
-            if (el) { el.innerHTML = ""; el.style.background = "#000000"; el.style.boxShadow = "none"; }
+        // ЖЕЛЕЗОБЕТОННАЯ ОЧИСТКА ВСЕХ КЛЕТОК БЕЗ ОШИБОК И UNDEFINED
+        var allCells = document.getElementsByClassName("cell");
+        for (var c = 0; c < allCells.length; c++) {
+            allCells[c].innerHTML = "";
+            allCells[c].style.background = "#000000";
+            allCells[c].style.boxShadow = "none";
         }
 
         var foodIndex = foodY * currentGridSize + foodX;
